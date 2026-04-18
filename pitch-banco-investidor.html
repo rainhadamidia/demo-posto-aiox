@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIOX Postos 360° — Pitch Investidor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #8B5CF6;
+    --primary-light: #A78BFA;
+    --primary-dark: #6D28D9;
+    --dark: #0A0A0A;
+    --surface: #1A1A1A;
+    --surface2: #242424;
+    --accent: #FFD700;
+    --success: #10B981;
+    --danger: #EF4444;
+    --text: #F5F5F9;
+    --text-muted: #9CA3AF;
+    --border: rgba(139,92,246,0.2);
+    --gold-border: rgba(255,215,0,0.25);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: #000;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  .deck { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 56px 80px;
+    opacity: 0; transform: translateX(60px);
+    transition: opacity .4s ease, transform .4s ease;
+    pointer-events: none;
+    background: var(--dark);
+    overflow-y: auto; overflow-x: hidden;
+  }
+  .slide::-webkit-scrollbar { width: 6px; }
+  .slide::-webkit-scrollbar-track { background: transparent; }
+  .slide::-webkit-scrollbar-thumb { background: rgba(139,92,246,.4); border-radius: 3px; }
+  .slide.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+  .slide.exit   { opacity: 0; transform: translateX(-60px); }
+
+  /* NAV */
+  .nav-arrow {
+    position: fixed; top: 50%; transform: translateY(-50%);
+    width: 52px; height: 52px;
+    background: rgba(139,92,246,.18); border: 1px solid rgba(139,92,246,.35);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 100; transition: background .2s, transform .2s;
+    backdrop-filter: blur(8px);
+  }
+  .nav-arrow:hover { background: rgba(139,92,246,.45); transform: translateY(-50%) scale(1.1); }
+  .nav-prev { left: 24px; } .nav-next { right: 24px; }
+  .nav-arrow svg { width: 22px; height: 22px; stroke: var(--primary-light); }
+  .dots { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 100; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(139,92,246,.3); border: 1px solid rgba(139,92,246,.5); cursor: pointer; transition: all .25s; }
+  .dot.active { background: var(--primary); transform: scale(1.35); border-color: var(--primary); }
+  .slide-counter { position: fixed; top: 24px; right: 80px; font-size: 13px; color: var(--text-muted); letter-spacing: .08em; z-index: 100; }
+  .slide-label { position: fixed; top: 24px; left: 80px; font-size: 12px; color: rgba(255,215,0,.5); letter-spacing: .1em; text-transform: uppercase; font-weight: 600; z-index: 100; }
+
+  /* UTILITIES */
+  .tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  }
+  .tag-purple { background: rgba(139,92,246,.18); color: var(--primary-light); border: 1px solid rgba(139,92,246,.3); }
+  .tag-gold   { background: rgba(255,215,0,.12);  color: var(--accent);        border: 1px solid rgba(255,215,0,.3); }
+  .tag-green  { background: rgba(16,185,129,.12); color: var(--success);       border: 1px solid rgba(16,185,129,.3); }
+  .tag-red    { background: rgba(239,68,68,.12);  color: var(--danger);        border: 1px solid rgba(239,68,68,.3); }
+
+  .slide-header { text-align: center; }
+  .slide-header h2 {
+    font-size: clamp(34px,4.2vw,54px); font-weight: 900; line-height: 1.1; letter-spacing: -.02em;
+    background: linear-gradient(135deg, #fff 0%, var(--primary-light) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .slide-header .sub { font-size: clamp(15px,1.7vw,19px); color: var(--text-muted); margin-top: 10px; }
+
+  /* ── S1 CAPA INVESTIDOR ── */
+  #s1 {
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(109,40,217,.32) 0%, var(--dark) 70%);
+    text-align: center; gap: 0;
+  }
+  #s1 .conf-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 20px; border-radius: 30px;
+    background: rgba(255,215,0,.1); border: 1px solid rgba(255,215,0,.35);
+    font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: .1em; text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+  #s1 .logo-ring {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 32px;
+    box-shadow: 0 0 60px rgba(139,92,246,.5);
+    position: relative;
+  }
+  #s1 .logo-ring::after {
+    content: ''; position: absolute; inset: -6px; border-radius: 50%;
+    border: 1px solid rgba(139,92,246,.4);
+    animation: pulse-ring 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse-ring {
+    0%,100% { transform: scale(1); opacity: .6; }
+    50%      { transform: scale(1.08); opacity: 1; }
+  }
+  #s1 h1 {
+    font-size: clamp(42px,5vw,68px); font-weight: 900; line-height: 1.05; letter-spacing: -.02em;
+    background: linear-gradient(135deg, #fff 0%, var(--primary-light) 55%, var(--accent) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 16px;
+  }
+  #s1 .sub-title { font-size: clamp(17px,2vw,24px); color: var(--text-muted); max-width: 640px; margin: 0 auto 36px; line-height: 1.5; }
+  #s1 .ask-box {
+    background: linear-gradient(135deg, rgba(255,215,0,.12), rgba(139,92,246,.12));
+    border: 2px solid var(--gold-border); border-radius: 20px;
+    padding: 28px 52px; margin-bottom: 40px;
+    display: inline-flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  #s1 .ask-label { font-size: 13px; font-weight: 700; color: var(--text-muted); letter-spacing: .1em; text-transform: uppercase; }
+  #s1 .ask-value { font-size: clamp(36px,4vw,54px); font-weight: 900; color: var(--accent); line-height: 1; }
+  #s1 .ask-sub { font-size: 15px; color: var(--text-muted); }
+  #s1 .meta-row { display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; }
+  #s1 .meta-item { text-align: center; }
+  #s1 .meta-item .mv { font-size: 22px; font-weight: 800; color: var(--primary-light); }
+  #s1 .meta-item .ml { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+  #s1 .footer-info {
+    position: absolute; bottom: 24px; left: 0; right: 0;
+    text-align: center; font-size: 12px; color: rgba(245,245,249,.2); letter-spacing: .06em;
+  }
+
+  /* ── S2 PROBLEMA / OPORTUNIDADE ── */
+  #s2 .opp-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    width: 100%; max-width: 1100px; margin-top: 36px;
+  }
+  .opp-card {
+    background: var(--surface); border-radius: 18px; padding: 28px 30px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .opp-card.danger-card { border: 1px solid rgba(239,68,68,.25); }
+  .opp-card.success-card { border: 1px solid rgba(16,185,129,.25); }
+  .opp-card h3 { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .opp-card.danger-card h3 { color: var(--danger); }
+  .opp-card.success-card h3 { color: var(--success); }
+  .opp-stat { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+  .opp-stat:last-child { border-bottom: none; }
+  .opp-stat .os-label { font-size: 14px; color: var(--text-muted); }
+  .opp-stat .os-val { font-size: 20px; font-weight: 800; }
+  .opp-card.danger-card .os-val { color: var(--danger); }
+  .opp-card.success-card .os-val { color: var(--success); }
+
+  /* ── S3 PRODUTO ── */
+  #s3 .produto-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; width: 100%; max-width: 1100px; margin-top: 32px; }
+  .prod-left { display: flex; flex-direction: column; gap: 14px; }
+  .prod-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 22px;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .prod-item .pi-icon { font-size: 22px; min-width: 24px; }
+  .prod-item h4 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .prod-item p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  .squads-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .sq-mini {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sq-mini .sqm-icon { font-size: 20px; }
+  .sq-mini .sqm-name { font-size: 13px; font-weight: 700; color: var(--primary-light); }
+  .sq-mini .sqm-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+  /* ── S4 VALIDAÇÃO / TRAÇÃO ── */
+  #s4 .traction-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; width: 100%; max-width: 1100px; margin-top: 32px; }
+  .traction-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 18px; padding: 28px 24px; text-align: center;
+    transition: border-color .2s;
+  }
+  .traction-card:hover { border-color: var(--primary); }
+  .traction-card .tc-icon { font-size: 32px; margin-bottom: 14px; }
+  .traction-card .tc-val { font-size: clamp(24px,2.8vw,38px); font-weight: 900; line-height: 1.1; margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--primary-light));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .traction-card .tc-label { font-size: 14px; color: var(--text-muted); line-height: 1.4; }
+  .jamilly-box {
+    width: 100%; max-width: 1100px; margin-top: 24px;
+    background: linear-gradient(135deg, rgba(255,215,0,.1), rgba(139,92,246,.1));
+    border: 1px solid var(--gold-border); border-radius: 16px;
+    padding: 24px 36px;
+    display: flex; align-items: center; gap: 24px;
+  }
+  .jamilly-box .jb-avatar {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: linear-gradient(135deg, #a07800, var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(255,215,0,.3);
+  }
+  .jamilly-box .jb-text h4 { font-size: 17px; font-weight: 800; color: var(--accent); margin-bottom: 5px; }
+  .jamilly-box .jb-text p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+  /* ── S5 MODELO DE NEGÓCIO ── */
+  #s5 .modelo-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; width: 100%; max-width: 1100px; margin-top: 28px; }
+  .modelo-card {
+    background: var(--surface); border-radius: 18px; padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 12px;
+    transition: border-color .2s, transform .2s;
+  }
+  .modelo-card:hover { transform: translateY(-4px); }
+  .modelo-card.destaque { border: 1px solid var(--primary); background: linear-gradient(160deg, rgba(139,92,246,.12) 0%, var(--surface) 60%); }
+  .modelo-card:not(.destaque) { border: 1px solid var(--border); }
+  .modelo-card .mc-tag { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
+  .modelo-card .mc-name { font-size: 20px; font-weight: 800; color: var(--text); }
+  .modelo-card .mc-price { font-size: 32px; font-weight: 900; color: var(--primary-light); line-height: 1; }
+  .modelo-card .mc-per { font-size: 13px; color: var(--text-muted); margin-top: -4px; }
+  .modelo-card .mc-impl { font-size: 13px; color: var(--accent); font-weight: 600; }
+  .modelo-card .mc-items { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+  .modelo-card .mc-item { font-size: 13px; color: var(--text-muted); display: flex; gap: 8px; }
+  .modelo-card .mc-item::before { content: '→'; color: var(--primary-light); font-weight: 700; }
+  .receita-box {
+    width: 100%; max-width: 1100px; margin-top: 20px;
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 14px;
+  }
+  .receita-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px; text-align: center;
+  }
+  .receita-item .ri-val { font-size: 22px; font-weight: 900; color: var(--accent); }
+  .receita-item .ri-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  /* ── S6 PROJEÇÃO FINANCEIRA ── */
+  #s6 .proj-table {
+    width: 100%; max-width: 1100px; margin-top: 28px;
+    border-collapse: collapse;
+    border-radius: 16px; overflow: hidden;
+  }
+  #s6 .proj-table th {
+    background: rgba(139,92,246,.18); padding: 14px 20px;
+    font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--primary-light); text-align: center; border-bottom: 1px solid var(--border);
+  }
+  #s6 .proj-table th:first-child { text-align: left; }
+  #s6 .proj-table td {
+    padding: 14px 20px; font-size: 15px; text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,.05); background: var(--surface);
+  }
+  #s6 .proj-table td:first-child { text-align: left; color: var(--text-muted); font-weight: 500; }
+  #s6 .proj-table tr.highlight td { background: rgba(139,92,246,.1); font-weight: 700; }
+  #s6 .proj-table tr.highlight-gold td { background: rgba(255,215,0,.08); color: var(--accent); font-weight: 800; }
+  #s6 .proj-table tr:last-child td { border-bottom: none; }
+  .cenario-pills { display: flex; gap: 20px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+  .cenario-pill {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 30px; padding: 12px 28px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  .cenario-pill .cp-label { font-size: 11px; color: var(--text-muted); letter-spacing: .06em; text-transform: uppercase; }
+  .cenario-pill .cp-val { font-size: 20px; font-weight: 800; color: var(--success); }
+
+  /* ── S7 USO DOS RECURSOS ── */
+  #s7 .uso-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 32px; width: 100%; max-width: 1100px; margin-top: 28px; }
+  .uso-left { display: flex; flex-direction: column; gap: 14px; }
+  .uso-bar-item { display: flex; flex-direction: column; gap: 6px; }
+  .uso-bar-item .ubi-header { display: flex; justify-content: space-between; align-items: center; }
+  .uso-bar-item .ubi-label { font-size: 14px; font-weight: 600; color: var(--text); }
+  .uso-bar-item .ubi-pct { font-size: 14px; font-weight: 800; color: var(--accent); }
+  .uso-bar-item .ubi-val { font-size: 12px; color: var(--text-muted); }
+  .bar-track { height: 10px; background: rgba(255,255,255,.06); border-radius: 5px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--primary-dark), var(--primary-light)); }
+  .bar-fill.gold { background: linear-gradient(90deg, #a07800, var(--accent)); }
+  .bar-fill.green { background: linear-gradient(90deg, #059669, var(--success)); }
+  .bar-fill.purple-soft { background: linear-gradient(90deg, var(--primary), var(--primary-light)); }
+  .uso-right { display: flex; flex-direction: column; gap: 14px; }
+  .uso-kpi {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 22px 24px; text-align: center;
+  }
+  .uso-kpi .uk-val { font-size: 32px; font-weight: 900; color: var(--accent); }
+  .uso-kpi .uk-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  .cronograma { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px; }
+  .cronograma h4 { font-size: 13px; font-weight: 700; color: var(--primary-light); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 14px; }
+  .crono-item { display: flex; gap: 14px; margin-bottom: 12px; }
+  .crono-item:last-child { margin-bottom: 0; }
+  .crono-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary-light); margin-top: 5px; flex-shrink: 0; }
+  .crono-text .ct-phase { font-size: 13px; font-weight: 700; color: var(--text); }
+  .crono-text .ct-desc { font-size: 12px; color: var(--text-muted); }
+
+  /* ── S8 VANTAGENS COMPETITIVAS ── */
+  #s8 .vant-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; width: 100%; max-width: 1100px; margin-top: 28px; }
+  .vant-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 18px; padding: 26px 22px;
+    transition: border-color .2s, transform .2s;
+  }
+  .vant-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+  .vant-card .vc-icon { font-size: 30px; margin-bottom: 14px; }
+  .vant-card h4 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .vant-card p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+  .moat-box {
+    width: 100%; max-width: 1100px; margin-top: 20px;
+    background: rgba(255,215,0,.06); border: 1px solid var(--gold-border);
+    border-radius: 14px; padding: 18px 32px;
+    display: flex; gap: 32px; align-items: center; flex-wrap: wrap; justify-content: center;
+  }
+  .moat-item { display: flex; align-items: center; gap: 10px; }
+  .moat-item .mi-icon { font-size: 18px; }
+  .moat-item .mi-text { font-size: 14px; font-weight: 600; color: var(--accent); }
+
+  /* ── S9 RETORNO DO INVESTIDOR ── */
+  #s9 { background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(255,215,0,.08) 0%, var(--dark) 70%); }
+  #s9 .retorno-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; width: 100%; max-width: 1100px; margin-top: 32px; }
+  .retorno-card {
+    background: var(--surface); border-radius: 20px; padding: 32px 28px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .retorno-card.gold { border: 1px solid var(--gold-border); background: linear-gradient(160deg, rgba(255,215,0,.07) 0%, var(--surface) 60%); }
+  .retorno-card.purple { border: 1px solid rgba(139,92,246,.35); background: linear-gradient(160deg, rgba(139,92,246,.1) 0%, var(--surface) 60%); }
+  .retorno-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .retorno-card.gold h3 { color: var(--accent); }
+  .retorno-card.purple h3 { color: var(--primary-light); }
+  .ret-stat { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+  .ret-stat:last-child { border-bottom: none; }
+  .ret-stat .rs-label { font-size: 14px; color: var(--text-muted); }
+  .ret-stat .rs-val { font-size: 20px; font-weight: 800; }
+  .retorno-card.gold .rs-val { color: var(--accent); }
+  .retorno-card.purple .rs-val { color: var(--primary-light); }
+  .retorno-bottom { width: 100%; max-width: 1100px; margin-top: 20px; }
+  .cenarios-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+  .cenario-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 22px 20px; text-align: center;
+  }
+  .cenario-card.base { border-color: rgba(16,185,129,.3); }
+  .cenario-card .cc-label { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+  .cenario-card .cc-val { font-size: 28px; font-weight: 900; color: var(--success); margin-bottom: 4px; }
+  .cenario-card .cc-sub { font-size: 12px; color: var(--text-muted); }
+
+  /* ── S10 FUNDADORA ── */
+  #s10 { background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(109,40,217,.2) 0%, var(--dark) 70%); }
+  #s10 .fund-layout { display: grid; grid-template-columns: 1fr 1.4fr; gap: 32px; width: 100%; max-width: 1100px; margin-top: 28px; }
+  .fund-card {
+    background: linear-gradient(160deg, rgba(139,92,246,.12) 0%, var(--surface) 60%);
+    border: 1px solid rgba(139,92,246,.35);
+    border-radius: 20px; padding: 36px 28px; text-align: center;
+  }
+  .fund-avatar {
+    width: 90px; height: 90px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    margin: 0 auto 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; box-shadow: 0 0 36px rgba(139,92,246,.45);
+  }
+  .fund-card h3 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .fund-card h4 { font-size: 12px; color: var(--primary-light); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 16px; }
+  .fund-card p { font-size: 14px; color: var(--text-muted); line-height: 1.65; }
+  .fund-right { display: flex; flex-direction: column; gap: 12px; }
+  .fund-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 22px;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .fund-item .fi-icon { font-size: 22px; min-width: 24px; }
+  .fund-item h4 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .fund-item p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  /* ── S11 PRÓXIMOS PASSOS ── */
+  #s11 {
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(109,40,217,.28) 0%, var(--dark) 70%);
+    text-align: center;
+  }
+  #s11 .ask-final {
+    background: linear-gradient(135deg, rgba(255,215,0,.14), rgba(139,92,246,.14));
+    border: 2px solid var(--gold-border); border-radius: 24px;
+    padding: 36px 60px; margin: 28px auto;
+    display: inline-flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  #s11 .af-label { font-size: 14px; font-weight: 700; color: var(--text-muted); letter-spacing: .1em; text-transform: uppercase; }
+  #s11 .af-range { font-size: clamp(42px,5vw,64px); font-weight: 900; color: var(--accent); line-height: 1; }
+  #s11 .af-sub { font-size: 16px; color: var(--text-muted); }
+  #s11 .steps-row { display: flex; gap: 16px; max-width: 900px; width: 100%; margin: 0 auto 28px; }
+  .step-box {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px 18px;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .step-box .sn {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 800;
+  }
+  .step-box h4 { font-size: 15px; font-weight: 700; }
+  .step-box p { font-size: 13px; color: var(--text-muted); text-align: center; line-height: 1.5; }
+  #s11 .contacts-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; max-width: 900px; }
+  .c-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px 24px;
+    display: flex; align-items: center; gap: 12px;
+    transition: border-color .2s;
+  }
+  .c-card:hover { border-color: var(--accent); }
+  .c-card .ci { font-size: 22px; }
+  .c-card h4 { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 2px; }
+  .c-card p { font-size: 14px; font-weight: 500; color: var(--text); }
+
+  @media print {
+    .nav-arrow, .dots, .slide-counter, .slide-label { display: none !important; }
+    .slide { position: relative !important; opacity: 1 !important; transform: none !important; page-break-after: always; height: 100vh; }
+    .deck { overflow: visible; height: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- ══════════════════════════════
+       S1 — CAPA INVESTIDOR
+  ══════════════════════════════ -->
+  <section class="slide active" id="s1">
+    <div class="conf-badge">🔒 Confidencial · Apresentação para Investidor</div>
+
+    <div class="logo-ring">
+      <svg viewBox="0 0 52 52" fill="none">
+        <circle cx="26" cy="26" r="10" fill="rgba(255,215,0,.9)"/>
+        <circle cx="26" cy="10" r="4" fill="rgba(255,255,255,.7)"/>
+        <circle cx="26" cy="42" r="4" fill="rgba(255,255,255,.7)"/>
+        <circle cx="10" cy="26" r="4" fill="rgba(255,255,255,.7)"/>
+        <circle cx="42" cy="26" r="4" fill="rgba(255,255,255,.7)"/>
+        <circle cx="14" cy="14" r="3" fill="rgba(167,139,250,.7)"/>
+        <circle cx="38" cy="14" r="3" fill="rgba(167,139,250,.7)"/>
+        <circle cx="14" cy="38" r="3" fill="rgba(167,139,250,.7)"/>
+        <circle cx="38" cy="38" r="3" fill="rgba(167,139,250,.7)"/>
+      </svg>
+    </div>
+
+    <h1>AIOX Postos 360°</h1>
+    <p class="sub-title">A primeira plataforma de Inteligência Artificial especializada em gestão completa de postos de combustível do Brasil</p>
+
+    <div class="ask-box">
+      <div class="ask-label">Captação Solicitada</div>
+      <div class="ask-value">R$ 150k – R$ 210k</div>
+      <div class="ask-sub">Investimento inicial · Desenvolvimento e escala do SaaS</div>
+    </div>
+
+    <div class="meta-row">
+      <div class="meta-item">
+        <div class="mv">R$ 500bi</div>
+        <div class="ml">Mercado Endereçável</div>
+      </div>
+      <div class="meta-item" style="width:1px;background:rgba(255,255,255,.1);height:40px;"></div>
+      <div class="meta-item">
+        <div class="mv">40.000+</div>
+        <div class="ml">Postos Ativos no Brasil</div>
+      </div>
+      <div class="meta-item" style="width:1px;background:rgba(255,255,255,.1);height:40px;"></div>
+      <div class="meta-item">
+        <div class="mv">22 Agentes</div>
+        <div class="ml">Produto 100% Construído</div>
+      </div>
+      <div class="meta-item" style="width:1px;background:rgba(255,255,255,.1);height:40px;"></div>
+      <div class="meta-item">
+        <div class="mv">Jamilly Pink</div>
+        <div class="ml">Validadora Oficial</div>
+      </div>
+    </div>
+
+    <div class="footer-info">
+      Rainha da Mídia IA Ltda · CNPJ 62.023.834/0001-70 · Emily Susan da Silva · rainhadamidia@gmail.com · 51 98133-7913
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════
+       S2 — PROBLEMA E OPORTUNIDADE
+  ══════════════════════════════ -->
+  <section class="slide" id="s2">
+    <div class="slide-header" style="margin-bottom:8px;">
+      <div class="tag tag-red" style="margin-bottom:12px;">O Problema</div>
+      <h2>Um Setor de R$ 500bi Gerido como 1995</h2>
+      <p class="sub">40.000 postos. Gestão manual. Margens destruídas. Donos reféns da operação.</p>
+    </div>
+
+    <div class="opp-grid">
+      <div class="opp-card danger-card">
+        <h3>🔴 Realidade Atual do Setor</h3>
+        <div class="opp-stat">
+          <span class="os-label">Margem real média</span>
+          <span class="os-val">1 – 2%</span>
+        </div>
+        <div class="opp-stat">
+          <span class="os-label">Donos que conhecem a margem real</span>
+          <span class="os-val">13%</span>
+        </div>
+        <div class="opp-stat">
+          <span class="os-label">Postos com gestão financeira digital</span>
+          <span class="os-val">&lt; 5%</span>
+        </div>
+        <div class="opp-stat">
+          <span class="os-label">Multas ANP por irregularidade</span>
+          <span class="os-val">R$ 50k–5M</span>
+        </div>
+        <div class="opp-stat">
+          <span class="os-label">Postos que fecham em 5 anos</span>
+          <span class="os-val">~30%</span>
+        </div>
+      </div>
+
+      <div class="opp-card success-card">
+        <h3>🟢 Oportunidade de Mercado</h3>
+        <div class="opp-stat">
+          <span class="os-label">TAM — Mercado total endereçável</span>
+          <span class="os-val">R$ 500bi/ano</span>
+        </div>
+        <div class="opp-stat">
+          <span class="os-label">SAM — Postos viáveis para SaaS</span>
+          <span class="os-val">~15.000</span>
+        </div>
+        <div class="opp-stat">
+          <span class="os-label">SOM — Meta 12 meses (1%)</span>
+          <span class="os-val">150 postos</span>
+        </div>
+        <div class="opp-stat">
+          <span class="os-label">MRR projetado (150 postos × R$3k)</span>
+          <span class="os-val">R$ 450k/mês</span>
+        </div>
+        <div class="opp-stat">
+          <span class="os-label">Margem possível com IA</span>
+          <span class="os-val">4 – 7%</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════
+       S3 — O PRODUTO
+  ══════════════════════════════ -->
+  <section class="slide" id="s3">
+    <div class="slide-header" style="margin-bottom:8px;">
+      <div class="tag tag-purple" style="margin-bottom:12px;">O Produto</div>
+      <h2>Plataforma Completa — 22 Agentes · 8 Squads</h2>
+      <p class="sub">Produto 100% desenvolvido, registrado no INPI e pronto para escala comercial.</p>
+    </div>
+
+    <div class="produto-layout">
+      <div class="prod-left">
+        <div class="prod-item">
+          <div class="pi-icon">🤖</div>
+          <div>
+            <h4>22 Agentes IA Especializados</h4>
+            <p>Cada agente é um especialista digital em sua área — financeiro, operacional, compliance, RH, marketing. Trabalham em conjunto 24/7.</p>
+          </div>
+        </div>
+        <div class="prod-item">
+          <div class="pi-icon">📋</div>
+          <div>
+            <h4>93 Assets Operacionais</h4>
+            <p>Tasks, templates, checklists, workflows e dados de referência. O produto mais completo do setor — nada precisa ser construído do zero.</p>
+          </div>
+        </div>
+        <div class="prod-item">
+          <div class="pi-icon">🛡️</div>
+          <div>
+            <h4>Compliance Total — ANP, INMETRO, Ambiental</h4>
+            <p>Monitoramento automático de todas as obrigações regulatórias. Nenhum posto fica exposto a multas por falta de controle.</p>
+          </div>
+        </div>
+        <div class="prod-item">
+          <div class="pi-icon">🔒</div>
+          <div>
+            <h4>INPI Registrado · Propriedade Intelectual Protegida</h4>
+            <p>Direitos autorais e descrição técnica registrados. Barreira de entrada criada antes da fase de escala.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="squads-mini">
+        <div class="sq-mini">
+          <span class="sqm-icon">💼</span>
+          <div><div class="sqm-name">Financeiro</div><div class="sqm-sub">Margem · DRE · Fluxo</div></div>
+        </div>
+        <div class="sq-mini">
+          <span class="sqm-icon">⚙️</span>
+          <div><div class="sqm-name">Operacional</div><div class="sqm-sub">Estoque · Turno · Qualidade</div></div>
+        </div>
+        <div class="sq-mini">
+          <span class="sqm-icon">👥</span>
+          <div><div class="sqm-name">CRM</div><div class="sqm-sub">Fidelidade · Frota</div></div>
+        </div>
+        <div class="sq-mini">
+          <span class="sqm-icon">🛡️</span>
+          <div><div class="sqm-name">Compliance</div><div class="sqm-sub">ANP · INMETRO · Fiscal</div></div>
+        </div>
+        <div class="sq-mini">
+          <span class="sqm-icon">🤝</span>
+          <div><div class="sqm-name">RH</div><div class="sqm-sub">Seleção · Treinamento</div></div>
+        </div>
+        <div class="sq-mini">
+          <span class="sqm-icon">📣</span>
+          <div><div class="sqm-name">Marketing</div><div class="sqm-sub">Reputação · Campanhas</div></div>
+        </div>
+        <div class="sq-mini">
+          <span class="sqm-icon">🛒</span>
+          <div><div class="sqm-name">Conveniência</div><div class="sqm-sub">Mix · Precificação</div></div>
+        </div>
+        <div class="sq-mini">
+          <span class="sqm-icon">⚡</span>
+          <div><div class="sqm-name">Energia & ESG</div><div class="sqm-sub">Solar · Resíduos</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════
+       S4 — VALIDAÇÃO E TRAÇÃO
+  ══════════════════════════════ -->
+  <section class="slide" id="s4">
+    <div class="slide-header" style="margin-bottom:8px;">
+      <div class="tag tag-gold" style="margin-bottom:12px;">Validação & Tração</div>
+      <h2>Produto Pronto. Validadora de Mercado Confirmada.</h2>
+      <p class="sub">Não estamos construindo — estamos escalando. O produto existe e a parceria estratégica está fechada.</p>
+    </div>
+
+    <div class="traction-grid">
+      <div class="traction-card">
+        <div class="tc-icon">✅</div>
+        <div class="tc-val">100%</div>
+        <div class="tc-label">Produto construído<br>22 agentes + 93 assets prontos</div>
+      </div>
+      <div class="traction-card">
+        <div class="tc-icon">🔒</div>
+        <div class="tc-val">INPI</div>
+        <div class="tc-label">Propriedade intelectual<br>registrada e protegida</div>
+      </div>
+      <div class="traction-card">
+        <div class="tc-icon">⛽</div>
+        <div class="tc-val">Jamilly Pink</div>
+        <div class="tc-label">Maior autoridade do setor<br>confirmada como parceira</div>
+      </div>
+    </div>
+
+    <div class="jamilly-box">
+      <div class="jb-avatar">⛽</div>
+      <div class="jb-text">
+        <h4>Jamilly Pink — Parceira Estratégica de Implementação e Validação</h4>
+        <p>A maior autoridade em postos de combustível do Brasil irá implementar e validar o AIOX Postos 360° na prática. Isso significa <strong style="color:var(--text);">acesso imediato a uma rede de postos clientes, credibilidade de mercado irrefutável e geração de cases reais</strong> antes do go-to-market amplo — um ativo que nenhum competidor potencial consegue replicar rapidamente.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════
+       S5 — MODELO DE NEGÓCIO
+  ══════════════════════════════ -->
+  <section class="slide" id="s5">
+    <div class="slide-header" style="margin-bottom:8px;">
+      <div class="tag tag-green" style="margin-bottom:12px;">Modelo de Negócio</div>
+      <h2>Receita Recorrente + Implantação</h2>
+      <p class="sub">SaaS com duas fontes de receita: mensalidade recorrente e fee de implantação por posto.</p>
+    </div>
+
+    <div class="modelo-grid">
+      <div class="modelo-card">
+        <div class="mc-tag">Plano Impulso</div>
+        <div class="mc-name">Posto Solo</div>
+        <div class="mc-price">R$ 4.997</div>
+        <div class="mc-per">/mês por posto</div>
+        <div class="mc-impl">+ R$ 12.000 implantação</div>
+        <div class="mc-items">
+          <div class="mc-item">22 agentes IA</div>
+          <div class="mc-item">Dashboard 24/7</div>
+          <div class="mc-item">Compliance automatizado</div>
+        </div>
+      </div>
+      <div class="modelo-card destaque">
+        <div class="mc-tag">Plano Rede · ⚡ Mais Vendido</div>
+        <div class="mc-name">Rede 2–9 Postos</div>
+        <div class="mc-price" style="background:linear-gradient(135deg,var(--primary-light),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">R$ 2.997</div>
+        <div class="mc-per">/mês por posto</div>
+        <div class="mc-impl">+ R$ 8.000 implantação/posto</div>
+        <div class="mc-items">
+          <div class="mc-item">Benchmarking multi-unidade</div>
+          <div class="mc-item">Gerente de conta dedicado</div>
+          <div class="mc-item">Painel consolidado rede</div>
+        </div>
+      </div>
+      <div class="modelo-card">
+        <div class="mc-tag">Plano Brasil</div>
+        <div class="mc-name">10+ Postos</div>
+        <div class="mc-price" style="color:var(--accent);">R$ 1.497</div>
+        <div class="mc-per">/mês por posto</div>
+        <div class="mc-impl">+ R$ 5.000 implantação/posto</div>
+        <div class="mc-items">
+          <div class="mc-item">Gestão centralizada nacional</div>
+          <div class="mc-item">Onboarding em 7 dias</div>
+          <div class="mc-item">SLA 99,9% enterprise</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="receita-box">
+      <div class="receita-item">
+        <div class="ri-val">R$ 4.997</div>
+        <div class="ri-label">Ticket médio/posto/mês</div>
+      </div>
+      <div class="receita-item">
+        <div class="ri-val">R$ 10.000</div>
+        <div class="ri-label">Implantação média/posto</div>
+      </div>
+      <div class="receita-item">
+        <div class="ri-val">&gt; 80%</div>
+        <div class="ri-label">Margem bruta estimada SaaS</div>
+      </div>
+      <div class="receita-item">
+        <div class="ri-val">&lt; 6 meses</div>
+        <div class="ri-label">CAC payback esperado</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════
+       S6 — PROJEÇÃO FINANCEIRA
+  ══════════════════════════════ -->
+  <section class="slide" id="s6">
+    <div class="slide-header" style="margin-bottom:8px;">
+      <div class="tag tag-gold" style="margin-bottom:12px;">Projeção Financeira</div>
+      <h2>Crescimento Conservador · 24 Meses</h2>
+      <p class="sub">Cenário base com crescimento orgânico via Jamilly Pink e vendas diretas.</p>
+    </div>
+
+    <table class="proj-table">
+      <thead>
+        <tr>
+          <th>Métrica</th>
+          <th>Mês 3</th>
+          <th>Mês 6</th>
+          <th>Mês 12</th>
+          <th>Mês 18</th>
+          <th>Mês 24</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Postos ativos</td>
+          <td>5</td>
+          <td>20</td>
+          <td>60</td>
+          <td>120</td>
+          <td>200</td>
+        </tr>
+        <tr>
+          <td>MRR (mensalidades)</td>
+          <td>R$ 25k</td>
+          <td>R$ 80k</td>
+          <td>R$ 240k</td>
+          <td>R$ 480k</td>
+          <td>R$ 800k</td>
+        </tr>
+        <tr>
+          <td>Receita implantação acum.</td>
+          <td>R$ 50k</td>
+          <td>R$ 200k</td>
+          <td>R$ 600k</td>
+          <td>R$ 1,2M</td>
+          <td>R$ 2M</td>
+        </tr>
+        <tr class="highlight">
+          <td>Receita total acumulada</td>
+          <td>R$ 75k</td>
+          <td>R$ 280k</td>
+          <td>R$ 840k</td>
+          <td>R$ 1,7M</td>
+          <td>R$ 3,2M</td>
+        </tr>
+        <tr class="highlight-gold">
+          <td>ARR projetado</td>
+          <td>—</td>
+          <td>—</td>
+          <td>R$ 2,9M</td>
+          <td>R$ 5,8M</td>
+          <td>R$ 9,6M</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="cenarios-row" style="width:100%;max-width:1100px;margin-top:18px;">
+      <div class="cenario-card">
+        <div class="cc-label">🐌 Cenário Conservador</div>
+        <div class="cc-val">R$ 1,5M</div>
+        <div class="cc-sub">ARR em 12 meses<br>30 postos</div>
+      </div>
+      <div class="cenario-card base">
+        <div class="cc-label">📈 Cenário Base</div>
+        <div class="cc-val">R$ 2,9M</div>
+        <div class="cc-sub">ARR em 12 meses<br>60 postos</div>
+      </div>
+      <div class="cenario-card" style="border-color:rgba(255,215,0,.3);">
+        <div class="cc-label" style="color:var(--accent);">🚀 Cenário Otimista</div>
+        <div class="cc-val" style="color:var(--accent);">R$ 5M</div>
+        <div class="cc-sub">ARR em 12 meses<br>100+ postos</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════
+       S7 — USO DOS RECURSOS
+  ══════════════════════════════ -->
+  <section class="slide" id="s7">
+    <div class="slide-header" style="margin-bottom:8px;">
+      <div class="tag tag-purple" style="margin-bottom:12px;">Uso dos Recursos</div>
+      <h2>Como os R$ 150k – R$ 210k Serão Aplicados</h2>
+      <p class="sub">Cada real direcionado para produto, tração e escala — sem desperdício.</p>
+    </div>
+
+    <div class="uso-layout">
+      <div class="uso-left">
+        <div class="uso-bar-item">
+          <div class="ubi-header">
+            <div>
+              <div class="ubi-label">Desenvolvimento do SaaS (plataforma web/app)</div>
+              <div class="ubi-val">R$ 60.000 – R$ 84.000</div>
+            </div>
+            <div class="ubi-pct">40%</div>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:40%"></div></div>
+        </div>
+        <div class="uso-bar-item">
+          <div class="ubi-header">
+            <div>
+              <div class="ubi-label">Integrações de API e infraestrutura cloud</div>
+              <div class="ubi-val">R$ 22.500 – R$ 31.500</div>
+            </div>
+            <div class="ubi-pct">15%</div>
+          </div>
+          <div class="bar-track"><div class="bar-fill purple-soft" style="width:15%"></div></div>
+        </div>
+        <div class="uso-bar-item">
+          <div class="ubi-header">
+            <div>
+              <div class="ubi-label">Comercial e onboarding dos primeiros clientes</div>
+              <div class="ubi-val">R$ 30.000 – R$ 42.000</div>
+            </div>
+            <div class="ubi-pct">20%</div>
+          </div>
+          <div class="bar-track"><div class="bar-fill gold" style="width:20%"></div></div>
+        </div>
+        <div class="uso-bar-item">
+          <div class="ubi-header">
+            <div>
+              <div class="ubi-label">Marketing, conteúdo e autoridade digital</div>
+              <div class="ubi-val">R$ 15.000 – R$ 21.000</div>
+            </div>
+            <div class="ubi-pct">10%</div>
+          </div>
+          <div class="bar-track"><div class="bar-fill green" style="width:10%"></div></div>
+        </div>
+        <div class="uso-bar-item">
+          <div class="ubi-header">
+            <div>
+              <div class="ubi-label">Legal, contábil e estrutura societária</div>
+              <div class="ubi-val">R$ 7.500 – R$ 10.500</div>
+            </div>
+            <div class="ubi-pct">5%</div>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:5%;background:rgba(139,92,246,.5)"></div></div>
+        </div>
+        <div class="uso-bar-item">
+          <div class="ubi-header">
+            <div>
+              <div class="ubi-label">Capital de giro e reserva operacional</div>
+              <div class="ubi-val">R$ 15.000 – R$ 21.000</div>
+            </div>
+            <div class="ubi-pct">10%</div>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:10%;background:rgba(16,185,129,.5)"></div></div>
+        </div>
+      </div>
+
+      <div class="uso-right">
+        <div class="uso-kpi">
+          <div class="uk-val">18 meses</div>
+          <div class="uk-label">Runway estimado com aporte</div>
+        </div>
+        <div class="uso-kpi">
+          <div class="uk-val">Mês 6</div>
+          <div class="uk-label">Meta de break-even operacional</div>
+        </div>
+        <div class="cronograma">
+          <h4>Cronograma de Execução</h4>
+          <div class="crono-item">
+            <div class="crono-dot"></div>
+            <div class="crono-text">
+              <div class="ct-phase">Meses 1–2: Fundação</div>
+              <div class="ct-desc">Dev SaaS · Setup infra · Primeiros clientes Jamilly</div>
+            </div>
+          </div>
+          <div class="crono-item">
+            <div class="crono-dot" style="background:var(--accent)"></div>
+            <div class="crono-text">
+              <div class="ct-phase">Meses 3–5: Tração</div>
+              <div class="ct-desc">20 postos ativos · Geração de cases reais</div>
+            </div>
+          </div>
+          <div class="crono-item">
+            <div class="crono-dot" style="background:var(--success)"></div>
+            <div class="crono-text">
+              <div class="ct-phase">Meses 6–12: Escala</div>
+              <div class="ct-desc">60+ postos · MRR R$240k · Expansão nacional</div>
+            </div>
+          </div>
+          <div class="crono-item">
+            <div class="crono-dot" style="background:var(--primary-light)"></div>
+            <div class="crono-text">
+              <div class="ct-phase">Meses 13–18: Liderança</div>
+              <div class="ct-desc">200 postos · ARR R$9,6M · Série A / reinvestimento</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════
+       S8 — VANTAGENS COMPETITIVAS
+  ══════════════════════════════ -->
+  <section class="slide" id="s8">
+    <div class="slide-header" style="margin-bottom:8px;">
+      <div class="tag tag-purple" style="margin-bottom:12px;">Vantagens Competitivas</div>
+      <h2>Por que Ninguém Consegue Replicar Rápido</h2>
+      <p class="sub">Um produto único, validado pela maior autoridade do setor, com propriedade intelectual protegida.</p>
+    </div>
+
+    <div class="vant-grid">
+      <div class="vant-card">
+        <div class="vc-icon">⚡</div>
+        <h4>Produto 100% Pronto</h4>
+        <p>22 agentes IA, 8 squads, 93 assets operacionais. Nenhum concorrente tem nem 20% disso construído para o setor de postos.</p>
+      </div>
+      <div class="vant-card">
+        <div class="vc-icon">⛽</div>
+        <h4>Jamilly Pink — Vantagem Irrepetível</h4>
+        <p>A maior autoridade do setor como validadora oficial. Acesso a uma rede de postos clientes e credibilidade que nenhum dinheiro compra rapidamente.</p>
+      </div>
+      <div class="vant-card">
+        <div class="vc-icon">🔒</div>
+        <h4>Propriedade Intelectual Registrada</h4>
+        <p>Direitos autorais e descrição técnica no INPI. Barreira legal criada antes da fase de escala — proteção real contra cópia.</p>
+      </div>
+      <div class="vant-card">
+        <div class="vc-icon">🎯</div>
+        <h4>Vertical Especializado — Postos</h4>
+        <p>Nenhuma solução genérica de IA entende ANP, INMETRO, ICMS-ST e variação de tanque. Nós somos os únicos nativos do setor.</p>
+      </div>
+      <div class="vant-card">
+        <div class="vc-icon">📊</div>
+        <h4>Dados Proprietários do Setor</h4>
+        <p>Benchmarks, regulamentações e parâmetros operacionais construídos internamente. Quanto mais postos, mais inteligente o produto fica.</p>
+      </div>
+      <div class="vant-card">
+        <div class="vc-icon">🚀</div>
+        <h4>Fundadora que Opera e Escala</h4>
+        <p>Emily Susan investe o capital para escalar seu próprio produto — alinhamento total entre investidor e fundadora. Skin in the game real.</p>
+      </div>
+    </div>
+
+    <div class="moat-box">
+      <div class="moat-item"><div class="mi-icon">🏆</div><div class="mi-text">First Mover — Primeiro SaaS de IA nativo para postos no Brasil</div></div>
+      <div class="moat-item"><div class="mi-icon">🔁</div><div class="mi-text">Receita recorrente com baixo churn esperado (&lt;5%)</div></div>
+      <div class="moat-item"><div class="mi-icon">📈</div><div class="mi-text">Network effect — quanto mais postos, mais benchmarks internos</div></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════
+       S9 — RETORNO DO INVESTIDOR
+  ══════════════════════════════ -->
+  <section class="slide" id="s9">
+    <div class="slide-header" style="margin-bottom:8px;">
+      <div class="tag tag-gold" style="margin-bottom:12px;">Retorno do Investidor</div>
+      <h2>O Que o Banco Recebe pelo Investimento</h2>
+      <p class="sub">Estrutura transparente de retorno — a ser definida em negociação.</p>
+    </div>
+
+    <div class="retorno-grid">
+      <div class="retorno-card gold">
+        <h3>💰 Projeção de Retorno (Cenário Base)</h3>
+        <div class="ret-stat">
+          <span class="rs-label">Aporte solicitado</span>
+          <span class="rs-val">R$ 150k–210k</span>
+        </div>
+        <div class="ret-stat">
+          <span class="rs-label">ARR em 12 meses</span>
+          <span class="rs-val">R$ 2,9M</span>
+        </div>
+        <div class="ret-stat">
+          <span class="rs-label">ARR em 24 meses</span>
+          <span class="rs-val">R$ 9,6M</span>
+        </div>
+        <div class="ret-stat">
+          <span class="rs-label">Valuation estimado (24m · 3× ARR)</span>
+          <span class="rs-val">R$ 28M+</span>
+        </div>
+        <div class="ret-stat">
+          <span class="rs-label">Múltiplo potencial sobre aporte</span>
+          <span class="rs-val">13–20×</span>
+        </div>
+      </div>
+
+      <div class="retorno-card purple">
+        <h3>📋 Estrutura Proposta (a negociar)</h3>
+        <div class="ret-stat">
+          <span class="rs-label">Modalidade sugerida</span>
+          <span class="rs-val" style="font-size:16px;">Mútuo conversível / Equity</span>
+        </div>
+        <div class="ret-stat">
+          <span class="rs-label">Participação sugerida</span>
+          <span class="rs-val">10 – 20%</span>
+        </div>
+        <div class="ret-stat">
+          <span class="rs-label">Retorno fixo alternativo</span>
+          <span class="rs-val" style="font-size:16px;">CDI + 4% a.a.</span>
+        </div>
+        <div class="ret-stat">
+          <span class="rs-label">Prazo de carência sugerido</span>
+          <span class="rs-val">12 meses</span>
+        </div>
+        <div class="ret-stat">
+          <span class="rs-label">Saída / liquidez</span>
+          <span class="rs-val" style="font-size:16px;">M&A ou Série A</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="width:100%;max-width:1100px;margin-top:18px;padding:16px 32px;background:rgba(255,215,0,.06);border:1px solid var(--gold-border);border-radius:12px;text-align:center;">
+      <p style="font-size:14px;color:var(--text-muted);">
+        Estrutura exata e percentuais sujeitos a negociação · Due diligence disponível ·
+        <strong style="color:var(--accent);">Investimento com produto pronto, validadora confirmada e mercado de R$ 500bi</strong>
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════
+       S10 — A FUNDADORA
+  ══════════════════════════════ -->
+  <section class="slide" id="s10">
+    <div class="slide-header" style="margin-bottom:8px;">
+      <div class="tag tag-purple" style="margin-bottom:12px;">A Fundadora</div>
+      <h2>Quem Está à Frente do AIOX Postos 360°</h2>
+      <p class="sub">Uma fundadora que constrói, opera e escala — não apenas delega.</p>
+    </div>
+
+    <div class="fund-layout">
+      <div class="fund-card">
+        <div class="fund-avatar">👩‍💼</div>
+        <h3>Emily Susan da Silva</h3>
+        <h4>Fundadora · Rainha da Mídia IA</h4>
+        <p>Empreendedora especializada em inteligência artificial aplicada a negócios tradicionais. Construiu do zero o maior ecossistema de agentes IA para postos de combustível do Brasil — 22 agentes, 8 squads, 93 assets — com produto registrado no INPI e parceria com a maior autoridade do setor.</p>
+        <p style="margin-top:14px;">O investimento solicitado será usado para escalar <strong style="color:var(--text);">seu próprio produto</strong>, garantindo alinhamento total de interesses com o investidor.</p>
+      </div>
+
+      <div class="fund-right">
+        <div class="fund-item">
+          <div class="fi-icon">🤖</div>
+          <div>
+            <h4>Produto Construído do Zero</h4>
+            <p>22 agentes IA, 93 assets, benchmarks e base normativa completa do setor — tudo desenvolvido e documentado antes da captação.</p>
+          </div>
+        </div>
+        <div class="fund-item">
+          <div class="fi-icon">🔒</div>
+          <div>
+            <h4>Propriedade Intelectual Protegida</h4>
+            <p>Registro de direitos autorais e descrição técnica no INPI. Proteção jurídica estabelecida antes da escala comercial.</p>
+          </div>
+        </div>
+        <div class="fund-item">
+          <div class="fi-icon">🤝</div>
+          <div>
+            <h4>Parceria Estratégica Fechada</h4>
+            <p>Jamilly Pink confirmada como implementadora e validadora — o maior ativo de distribuição e credibilidade do setor.</p>
+          </div>
+        </div>
+        <div class="fund-item">
+          <div class="fi-icon">🎯</div>
+          <div>
+            <h4>Modelo Claro de Escala Própria</h4>
+            <p>Visão e execução para escalar seus próprios produtos com o aporte — sem depender de terceiros para entregar o core do negócio.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════
+       S11 — PRÓXIMOS PASSOS / CTA
+  ══════════════════════════════ -->
+  <section class="slide" id="s11">
+    <div class="slide-header" style="margin-bottom:4px;">
+      <div class="tag tag-gold" style="margin-bottom:12px;">Próximos Passos</div>
+      <h2>Vamos Construir Isso Juntos</h2>
+      <p class="sub">Produto pronto. Validadora confirmada. Mercado enorme. Falta o capital para escalar.</p>
+    </div>
+
+    <div class="ask-final">
+      <div class="af-label">Investimento Solicitado</div>
+      <div class="af-range">R$ 150.000 – R$ 210.000</div>
+      <div class="af-sub">Para desenvolver a plataforma SaaS e escalar os primeiros 60 postos em 12 meses</div>
+    </div>
+
+    <div class="steps-row">
+      <div class="step-box">
+        <div class="sn">1</div>
+        <h4>Due Diligence</h4>
+        <p>Acesso a produto, documentação técnica, registro INPI e proposta de parceria com Jamilly Pink.</p>
+      </div>
+      <div class="step-box">
+        <div class="sn">2</div>
+        <h4>Negociação</h4>
+        <p>Definir estrutura do investimento: equity, mútuo conversível ou modelo híbrido.</p>
+      </div>
+      <div class="step-box">
+        <div class="sn">3</div>
+        <h4>Contrato e Aporte</h4>
+        <p>Formalização com suporte jurídico. Cronograma de liberação conforme marcos acordados.</p>
+      </div>
+      <div class="step-box">
+        <div class="sn">4</div>
+        <h4>Execução</h4>
+        <p>Desenvolvimento do SaaS, onboarding dos primeiros postos e geração dos cases iniciais.</p>
+      </div>
+    </div>
+
+    <div class="contacts-row">
+      <div class="c-card">
+        <div class="ci">👩‍💼</div>
+        <div><h4>Fundadora</h4><p>Emily Susan da Silva</p></div>
+      </div>
+      <div class="c-card">
+        <div class="ci">📱</div>
+        <div><h4>WhatsApp</h4><p>51 98133-7913</p></div>
+      </div>
+      <div class="c-card">
+        <div class="ci">📧</div>
+        <div><h4>E-mail</h4><p>rainhadamidia@gmail.com</p></div>
+      </div>
+      <div class="c-card">
+        <div class="ci">🏢</div>
+        <div><h4>Rainha da Mídia IA Ltda</h4><p>CNPJ 62.023.834/0001-70</p></div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /deck -->
+
+<div class="slide-label" id="slideLabel">Confidencial · Investidor</div>
+<button class="nav-arrow nav-prev" id="btnPrev">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+</button>
+<button class="nav-arrow nav-next" id="btnNext">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+</button>
+<div class="dots" id="dots"></div>
+<div class="slide-counter" id="counter"></div>
+
+<script>
+(function(){
+  const slides = document.querySelectorAll('.slide');
+  const dotsEl = document.getElementById('dots');
+  const counter = document.getElementById('counter');
+  let current = 0, animating = false;
+
+  slides.forEach((_,i)=>{
+    const d = document.createElement('div');
+    d.className = 'dot'+(i===0?' active':'');
+    d.addEventListener('click', ()=> goTo(i));
+    dotsEl.appendChild(d);
+  });
+
+  function updateUI(){
+    document.querySelectorAll('.dot').forEach((d,i)=> d.classList.toggle('active', i===current));
+    counter.textContent = (current+1)+' / '+slides.length;
+  }
+
+  function goTo(n){
+    if(animating || n===current) return;
+    animating = true;
+    const prev = current;
+    current = Math.max(0, Math.min(slides.length-1, n));
+    slides[prev].classList.add('exit');
+    slides[prev].classList.remove('active');
+    slides[current].classList.remove('exit');
+    slides[current].classList.add('active');
+    setTimeout(()=>{ slides[prev].classList.remove('exit'); animating=false; }, 420);
+    updateUI();
+  }
+
+  document.getElementById('btnPrev').addEventListener('click', ()=> goTo(current-1));
+  document.getElementById('btnNext').addEventListener('click', ()=> goTo(current+1));
+  document.addEventListener('keydown', e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){ e.preventDefault(); goTo(current+1); }
+    if(e.key==='ArrowLeft'||e.key==='ArrowUp'){ e.preventDefault(); goTo(current-1); }
+    if(e.key==='Home') goTo(0);
+    if(e.key==='End') goTo(slides.length-1);
+  });
+  let tx=0;
+  document.addEventListener('touchstart', e=>{ tx=e.touches[0].clientX; },{passive:true});
+  document.addEventListener('touchend', e=>{
+    const dx=e.changedTouches[0].clientX-tx;
+    if(Math.abs(dx)>50) dx<0?goTo(current+1):goTo(current-1);
+  },{passive:true});
+
+  updateUI();
+})();
+</script>
+</body>
+</html>

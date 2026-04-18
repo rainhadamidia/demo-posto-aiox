@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIOX Postos 360° — Inteligência Artificial para Postos de Combustível</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #8B5CF6;
+    --primary-light: #A78BFA;
+    --primary-dark: #6D28D9;
+    --dark: #0A0A0A;
+    --surface: #1A1A1A;
+    --surface2: #242424;
+    --accent: #FFD700;
+    --success: #10B981;
+    --danger: #EF4444;
+    --text: #F5F5F9;
+    --text-muted: #9CA3AF;
+    --border: rgba(139,92,246,0.2);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: #000;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  .deck {
+    width: 100vw; height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 60px 80px;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity .4s ease, transform .4s ease;
+    pointer-events: none;
+    background: var(--dark);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .slide::-webkit-scrollbar { width: 6px; }
+  .slide::-webkit-scrollbar-track { background: transparent; }
+  .slide::-webkit-scrollbar-thumb { background: rgba(139,92,246,.4); border-radius: 3px; }
+  .slide::-webkit-scrollbar-thumb:hover { background: rgba(139,92,246,.7); }
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+  }
+  .slide.exit {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  /* ── NAVEGAÇÃO ── */
+  .nav-arrow {
+    position: fixed;
+    top: 50%; transform: translateY(-50%);
+    width: 52px; height: 52px;
+    background: rgba(139,92,246,.18);
+    border: 1px solid rgba(139,92,246,.35);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: background .2s, transform .2s;
+    backdrop-filter: blur(8px);
+  }
+  .nav-arrow:hover { background: rgba(139,92,246,.45); transform: translateY(-50%) scale(1.1); }
+  .nav-prev { left: 24px; }
+  .nav-next { right: 24px; }
+  .nav-arrow svg { width: 22px; height: 22px; stroke: var(--primary-light); }
+
+  .dots {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 10px; z-index: 100;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(139,92,246,.3);
+    border: 1px solid rgba(139,92,246,.5);
+    cursor: pointer;
+    transition: all .25s;
+  }
+  .dot.active { background: var(--primary); transform: scale(1.35); border-color: var(--primary); }
+
+  .slide-counter {
+    position: fixed; top: 24px; right: 80px;
+    font-size: 13px; color: var(--text-muted);
+    letter-spacing: .08em; z-index: 100;
+  }
+
+  /* ── UTILITIES ── */
+  .tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 13px; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  .tag-purple { background: rgba(139,92,246,.18); color: var(--primary-light); border: 1px solid rgba(139,92,246,.3); }
+  .tag-gold   { background: rgba(255,215,0,.12);  color: var(--accent);        border: 1px solid rgba(255,215,0,.3); }
+  .tag-green  { background: rgba(16,185,129,.12); color: var(--success);       border: 1px solid rgba(16,185,129,.3); }
+  .tag-red    { background: rgba(239,68,68,.12);  color: var(--danger);        border: 1px solid rgba(239,68,68,.3); }
+
+  .glow-line {
+    width: 80px; height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 2px;
+    margin: 16px auto;
+  }
+
+  /* ── SLIDE 1 — CAPA ── */
+  #s1 {
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(109,40,217,.3) 0%, var(--dark) 70%);
+    text-align: center;
+    gap: 0;
+  }
+  #s1 .logo-ring {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 36px;
+    box-shadow: 0 0 60px rgba(139,92,246,.5);
+    position: relative;
+  }
+  #s1 .logo-ring::after {
+    content: '';
+    position: absolute; inset: -6px;
+    border-radius: 50%;
+    border: 1px solid rgba(139,92,246,.4);
+    animation: pulse-ring 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse-ring {
+    0%,100% { transform: scale(1); opacity: .6; }
+    50%      { transform: scale(1.08); opacity: 1; }
+  }
+  #s1 .logo-ring svg { width: 52px; height: 52px; }
+
+  #s1 h1 {
+    font-size: clamp(44px, 5.5vw, 72px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    background: linear-gradient(135deg, #fff 0%, var(--primary-light) 60%, var(--accent) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 20px;
+  }
+  #s1 h2 {
+    font-size: clamp(18px, 2.2vw, 26px);
+    font-weight: 400; color: var(--text-muted);
+    max-width: 620px; line-height: 1.5;
+    margin: 0 auto 40px;
+  }
+  #s1 .badges {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 48px;
+  }
+  #s1 .footer-cnpj {
+    position: absolute; bottom: 28px; left: 0; right: 0;
+    text-align: center; font-size: 12px; color: rgba(245,245,249,.25);
+    letter-spacing: .08em;
+  }
+  #s1 .brand-name {
+    font-size: clamp(13px,1.5vw,16px); font-weight: 600;
+    color: var(--text-muted); letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 12px;
+    opacity: 0.7;
+  }
+
+  /* ── SLIDE 2 — MERCADO ── */
+  #s2 { gap: 0; }
+  #s2 .slide-header { text-align: center; margin-bottom: 52px; }
+  #s2 .metrics-grid {
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 20px;
+    width: 100%; max-width: 1200px;
+  }
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 24px;
+    text-align: center;
+    transition: transform .2s, border-color .2s;
+  }
+  .metric-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+  .metric-card .metric-val {
+    font-size: clamp(32px,3.5vw,52px);
+    font-weight: 900;
+    line-height: 1.1;
+    background: linear-gradient(135deg, var(--accent), var(--primary-light));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 10px;
+  }
+  .metric-card .metric-label { font-size: 15px; color: var(--text-muted); line-height: 1.4; }
+  .metric-card .metric-icon { font-size: 32px; margin-bottom: 16px; }
+
+  /* ── SLIDE 3 — DORES ── */
+  #s3 .dores-grid {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 16px;
+    width: 100%; max-width: 1200px;
+  }
+  .dor-item {
+    background: var(--surface);
+    border: 1px solid rgba(239,68,68,.2);
+    border-left: 3px solid var(--danger);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex; align-items: flex-start; gap: 14px;
+    transition: transform .2s, border-color .2s;
+  }
+  .dor-item:hover { transform: translateX(4px); border-left-color: #f87171; }
+  .dor-num {
+    font-size: 13px; font-weight: 800; color: var(--danger);
+    min-width: 24px; padding-top: 2px;
+  }
+  .dor-text { font-size: 15px; font-weight: 500; color: var(--text); line-height: 1.4; }
+  .dor-sub { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+
+  /* ── SLIDE 4 — ANTES ── */
+  #s4 {
+    background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(239,68,68,.12) 0%, var(--dark) 70%);
+    justify-content: center; align-items: center;
+  }
+  #s4 .antes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 20px;
+    width: min(940px, calc(100vw - 160px));
+    align-self: center;
+  }
+  .antes-item {
+    background: var(--surface);
+    border: 1px solid rgba(239,68,68,.25);
+    border-radius: 16px; padding: 24px 28px;
+    display: flex; flex-direction: column; gap: 8px;
+    height: 100%;
+  }
+  .antes-item .ai-icon { font-size: 28px; margin-bottom: 4px; }
+  .antes-item h3 { font-size: 15px; color: var(--danger); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+  .antes-item p  { font-size: 22px; font-weight: 700; color: var(--text); }
+  .antes-item span { font-size: 14px; color: var(--text-muted); }
+
+  /* ── SLIDE 5 — SOLUÇÃO ── */
+  #s5 {
+    background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(109,40,217,.22) 0%, var(--dark) 70%);
+  }
+  #s5 .squads-grid {
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 14px;
+    width: 100%; max-width: 1200px;
+    margin-bottom: 28px;
+  }
+  .squad-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 22px 16px;
+    text-align: center;
+    transition: all .2s;
+  }
+  .squad-card:hover { border-color: var(--primary); background: rgba(139,92,246,.1); transform: translateY(-4px); }
+  .squad-card .squad-icon { font-size: 28px; margin-bottom: 10px; }
+  .squad-card .squad-name { font-size: 12px; font-weight: 700; color: var(--primary-light); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 5px; }
+  .squad-card .squad-agents { font-size: 12px; color: var(--text-muted); }
+  .features-row {
+    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+    max-width: 1000px;
+  }
+  .feat-pill {
+    background: rgba(139,92,246,.12); border: 1px solid rgba(139,92,246,.3);
+    border-radius: 30px; padding: 9px 20px;
+    font-size: 14px; font-weight: 500; color: var(--primary-light);
+    display: flex; align-items: center; gap: 7px;
+  }
+
+  /* ── SLIDE 6 — DEPOIS ── */
+  #s6 {
+    background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(16,185,129,.1) 0%, var(--dark) 70%);
+    justify-content: center; align-items: center;
+  }
+  #s6 .depois-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 20px;
+    width: min(940px, calc(100vw - 160px));
+    align-self: center;
+  }
+  .depois-item {
+    background: var(--surface);
+    border: 1px solid rgba(16,185,129,.25);
+    border-radius: 16px; padding: 24px 28px;
+    display: flex; flex-direction: column; gap: 8px;
+    height: 100%;
+  }
+  .depois-item .ai-icon { font-size: 28px; margin-bottom: 4px; }
+  .depois-item h3 { font-size: 15px; color: var(--success); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+  .depois-item p  { font-size: 22px; font-weight: 700; color: var(--text); }
+  .depois-item span { font-size: 14px; color: var(--text-muted); }
+
+  /* ── SLIDE 7 — ROI ── */
+  #s7 { gap: 0; }
+  #s7 .roi-comparison {
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 0;
+    width: 100%; max-width: 1100px;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+  .roi-box {
+    background: var(--surface); border-radius: 20px;
+    padding: 36px 32px; text-align: center;
+  }
+  .roi-box.antes-box { border: 1px solid rgba(239,68,68,.3); }
+  .roi-box.depois-box { border: 1px solid rgba(16,185,129,.3); }
+  .roi-box .rb-label { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 16px; }
+  .roi-box.antes-box .rb-label { color: var(--danger); }
+  .roi-box.depois-box .rb-label { color: var(--success); }
+  .roi-box .rb-value {
+    font-size: clamp(32px,3.5vw,48px); font-weight: 900; line-height: 1.1; margin-bottom: 8px;
+  }
+  .roi-box.antes-box .rb-value { color: var(--danger); }
+  .roi-box.depois-box .rb-value { color: var(--success); }
+  .roi-box .rb-sub { font-size: 14px; color: var(--text-muted); }
+  .roi-arrow {
+    width: 80px; text-align: center; font-size: 36px;
+    color: var(--primary-light);
+  }
+  .roi-cards {
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 16px;
+    width: 100%; max-width: 1100px;
+  }
+  .roi-kpi {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px 20px; text-align: center;
+  }
+  .roi-kpi .kpi-val {
+    font-size: clamp(22px,2.5vw,34px); font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--primary-light));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 6px;
+  }
+  .roi-kpi .kpi-label { font-size: 13px; color: var(--text-muted); }
+
+  /* ── SLIDE 8 — REDES ── */
+  #s8 .redes-layout {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
+    width: 100%; max-width: 1100px;
+  }
+  .redes-left, .redes-right { display: flex; flex-direction: column; gap: 16px; }
+  .rede-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px 24px;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .rede-item .ri-icon { font-size: 24px; min-width: 24px; }
+  .rede-item .ri-text h4 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .rede-item .ri-text p { font-size: 13px; color: var(--text-muted); }
+  .scale-card {
+    background: linear-gradient(135deg, rgba(139,92,246,.15), rgba(255,215,0,.08));
+    border: 1px solid rgba(255,215,0,.25);
+    border-radius: 20px; padding: 32px;
+    text-align: center;
+  }
+  .scale-card h3 { font-size: 18px; font-weight: 700; color: var(--accent); margin-bottom: 20px; }
+  .scale-stats { display: flex; flex-direction: column; gap: 14px; }
+  .scale-stat { display: flex; justify-content: space-between; align-items: center; }
+  .scale-stat .ss-label { font-size: 14px; color: var(--text-muted); }
+  .scale-stat .ss-val { font-size: 22px; font-weight: 800; color: var(--accent); }
+
+  /* ── SLIDE 9 — VALIDAÇÃO ── */
+  #s9 {
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(255,215,0,.08) 0%, var(--dark) 70%);
+  }
+  #s9 .valid-layout {
+    display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px;
+    width: 100%; max-width: 1100px;
+  }
+  .validator-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 36px 32px;
+    text-align: center;
+    transition: transform .2s, border-color .2s;
+  }
+  .validator-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+  .validator-card.gold-card {
+    border-color: rgba(255,215,0,.35);
+    background: linear-gradient(160deg, rgba(255,215,0,.06) 0%, var(--surface) 60%);
+  }
+  .val-avatar {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    margin: 0 auto 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    box-shadow: 0 0 30px rgba(139,92,246,.4);
+  }
+  .val-avatar.gold-avatar {
+    background: linear-gradient(135deg, #a07800, var(--accent));
+    box-shadow: 0 0 30px rgba(255,215,0,.35);
+  }
+  .validator-card h3 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+  .validator-card h4 { font-size: 12px; color: var(--primary-light); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 16px; }
+  .validator-card.gold-card h4 { color: var(--accent); }
+  .validator-card p { font-size: 14px; color: var(--text-muted); line-height: 1.65; }
+  .val-badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px; }
+  .val-badge {
+    background: rgba(255,215,0,.1); border: 1px solid rgba(255,215,0,.25);
+    border-radius: 20px; padding: 5px 14px;
+    font-size: 12px; font-weight: 600; color: var(--accent);
+  }
+  .badges-row {
+    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+    margin-top: 28px; width: 100%; max-width: 1100px;
+  }
+  .badge-pill {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 30px; padding: 10px 22px;
+    font-size: 14px; font-weight: 600; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* ── SLIDE 10 — CTA ── */
+  #s10 {
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(109,40,217,.25) 0%, var(--dark) 70%);
+    text-align: center; gap: 0;
+  }
+  #s10 .cta-steps {
+    display: flex; gap: 16px; margin: 32px 0;
+    max-width: 900px; width: 100%;
+  }
+  .cta-step {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    transition: border-color .2s, transform .2s;
+  }
+  .cta-step:hover { border-color: var(--primary); transform: translateY(-4px); }
+  .cta-step .step-num {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800;
+  }
+  .cta-step h4 { font-size: 16px; font-weight: 700; }
+  .cta-step p { font-size: 13px; color: var(--text-muted); text-align: center; line-height: 1.5; }
+  .contacts-grid {
+    display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;
+    max-width: 900px; width: 100%;
+  }
+  .contact-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px 28px;
+    display: flex; align-items: center; gap: 14px;
+    transition: border-color .2s;
+  }
+  .contact-card:hover { border-color: var(--accent); }
+  .contact-card .cc-icon { font-size: 24px; }
+  .contact-card .cc-info h4 { font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 3px; }
+  .contact-card .cc-info p { font-size: 15px; font-weight: 500; color: var(--text); }
+
+  /* ── SHARED SLIDE HEADER ── */
+  .slide-header { text-align: center; }
+  .slide-header h2 {
+    font-size: clamp(36px,4.5vw,58px);
+    font-weight: 900; line-height: 1.1;
+    letter-spacing: -.02em;
+    background: linear-gradient(135deg, #fff 0%, var(--primary-light) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .slide-header .sub {
+    font-size: clamp(15px,1.8vw,20px);
+    color: var(--text-muted); margin-top: 10px;
+  }
+
+  /* ── SLIDE 11 — PLANOS ── */
+  #s11 {
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(109,40,217,.22) 0%, var(--dark) 70%);
+    gap: 0;
+  }
+  .plans-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.08fr 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 1180px;
+    align-items: start;
+  }
+  .plan-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 36px 28px;
+    display: flex; flex-direction: column; gap: 0;
+    position: relative;
+    transition: transform .2s, border-color .2s;
+  }
+  .plan-card:hover { transform: translateY(-6px); }
+  .plan-card.featured {
+    border-color: var(--primary);
+    background: linear-gradient(160deg, rgba(139,92,246,.13) 0%, var(--surface) 60%);
+    box-shadow: 0 0 60px rgba(139,92,246,.18);
+  }
+  .plan-card.featured-gold {
+    border-color: rgba(255,215,0,.4);
+    background: linear-gradient(160deg, rgba(255,215,0,.07) 0%, var(--surface) 60%);
+  }
+  .plan-badge {
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    padding: 5px 18px; border-radius: 20px;
+    font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .plan-badge.pb-purple { background: var(--primary); color: #fff; }
+  .plan-badge.pb-gold   { background: var(--accent);  color: #000; }
+  .plan-name {
+    font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 10px;
+  }
+  .plan-title {
+    font-size: clamp(22px,2.2vw,30px); font-weight: 900; color: var(--text);
+    line-height: 1.1; margin-bottom: 4px;
+  }
+  .plan-subtitle {
+    font-size: 13px; color: var(--text-muted); margin-bottom: 24px;
+  }
+  .plan-price-row {
+    display: flex; align-items: flex-end; gap: 4px; margin-bottom: 6px;
+  }
+  .plan-price-prefix { font-size: 16px; font-weight: 600; color: var(--text-muted); padding-bottom: 4px; }
+  .plan-price {
+    font-size: clamp(34px,3.5vw,46px); font-weight: 900; line-height: 1;
+  }
+  .plan-price-suffix { font-size: 14px; color: var(--text-muted); padding-bottom: 6px; }
+  .plan-price-note {
+    font-size: 12px; color: var(--text-muted); margin-bottom: 24px;
+  }
+  .plan-divider {
+    height: 1px; background: var(--border); margin-bottom: 20px;
+  }
+  .plan-features {
+    display: flex; flex-direction: column; gap: 11px;
+    margin-bottom: 28px; flex: 1;
+  }
+  .pf-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 14px; color: var(--text);
+  }
+  .pf-item .pf-icon { font-size: 14px; min-width: 18px; margin-top: 1px; }
+  .plan-setup {
+    font-size: 12px; color: var(--text-muted); text-align: center;
+    padding: 10px 16px; background: rgba(255,255,255,.04); border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  .plan-setup strong { color: var(--text); }
+  .plan-cta {
+    display: block; width: 100%; padding: 14px;
+    border-radius: 14px; font-size: 15px; font-weight: 700;
+    text-align: center; cursor: pointer; border: none;
+    transition: opacity .2s, transform .15s;
+    letter-spacing: .03em;
+  }
+  .plan-cta:hover { opacity: .88; transform: scale(1.02); }
+  .plan-cta.cta-outline {
+    background: transparent; border: 1.5px solid rgba(139,92,246,.5);
+    color: var(--primary-light);
+  }
+  .plan-cta.cta-primary {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    color: #fff;
+  }
+  .plan-cta.cta-gold {
+    background: linear-gradient(135deg, #c9a300, var(--accent));
+    color: #000;
+  }
+  .plans-note {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center;
+    max-width: 1100px; width: 100%;
+    padding: 14px 28px;
+    background: rgba(255,215,0,.05);
+    border: 1px solid rgba(255,215,0,.18);
+    border-radius: 12px;
+  }
+  .plans-note span { font-size: 13px; color: var(--text-muted); }
+  .plans-note span b { color: var(--accent); }
+  .plans-note .sep { width: 1px; height: 18px; background: rgba(255,215,0,.2); }
+
+  @media print {
+    .nav-arrow, .dots, .slide-counter { display: none !important; }
+    .slide { position: relative !important; opacity: 1 !important; transform: none !important;
+      page-break-after: always; height: 100vh; }
+    .deck { overflow: visible; height: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- ══════════════════════════════════
+       SLIDE 1 — CAPA
+  ══════════════════════════════════ -->
+  <section class="slide active" id="s1">
+    <div class="logo-ring">
+      <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="26" cy="26" r="10" fill="rgba(255,215,0,.9)"/>
+        <circle cx="26" cy="10" r="4" fill="rgba(255,255,255,.7)"/>
+        <circle cx="26" cy="42" r="4" fill="rgba(255,255,255,.7)"/>
+        <circle cx="10" cy="26" r="4" fill="rgba(255,255,255,.7)"/>
+        <circle cx="42" cy="26" r="4" fill="rgba(255,255,255,.7)"/>
+        <circle cx="14" cy="14" r="3" fill="rgba(167,139,250,.7)"/>
+        <circle cx="38" cy="14" r="3" fill="rgba(167,139,250,.7)"/>
+        <circle cx="14" cy="38" r="3" fill="rgba(167,139,250,.7)"/>
+        <circle cx="38" cy="38" r="3" fill="rgba(167,139,250,.7)"/>
+        <line x1="26" y1="16" x2="26" y2="10" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
+        <line x1="26" y1="36" x2="26" y2="42" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
+        <line x1="16" y1="26" x2="10" y2="26" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
+        <line x1="36" y1="26" x2="42" y2="26" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
+      </svg>
+    </div>
+
+    <div class="brand-name">Powered by AIOX · Rainha da Mídia IA</div>
+    <h1>AIOX Postos 360°</h1>
+    <h2>22 Agentes de IA Especializados trabalhando 24/7 para transformar a gestão completa do seu posto</h2>
+
+    <div class="badges">
+      <span class="tag tag-purple">⚡ 22 Agentes IA</span>
+      <span class="tag tag-gold">📈 ROI em 6 meses</span>
+      <span class="tag tag-green">🏆 #1 Brasil — Postos de Combustível</span>
+      <span class="tag tag-purple">🛡️ 8 Squads Especializados</span>
+    </div>
+
+    <p style="font-size:15px;color:var(--text-muted);letter-spacing:.05em;">Diagnóstico 360° gratuito disponível · Resultados em 48 horas</p>
+
+    <div class="footer-cnpj">
+      Rainha da Mídia IA Ltda &nbsp;|&nbsp; CNPJ: 62.023.834/0001-70 &nbsp;|&nbsp; rainhadamidia@gmail.com
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SLIDE 2 — MERCADO
+  ══════════════════════════════════ -->
+  <section class="slide" id="s2">
+    <div class="slide-header" style="margin-bottom:44px;">
+      <div class="tag tag-purple" style="margin-bottom:14px;">Visão do Setor</div>
+      <h2>O Maior Mercado Ignorado do Brasil</h2>
+      <p class="sub">R$ 500 bilhões por ano. Gestão da era industrial. Janela de transformação única.</p>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon">💰</div>
+        <div class="metric-val">R$ 500bi</div>
+        <div class="metric-label">movimentados<br>por ano no Brasil</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon">⛽</div>
+        <div class="metric-val">40.000+</div>
+        <div class="metric-label">postos ativos<br>em todo o Brasil</div>
+      </div>
+      <div class="metric-card" style="border-color:rgba(239,68,68,.3);">
+        <div class="metric-icon">📉</div>
+        <div class="metric-val" style="background:linear-gradient(135deg,var(--danger),#f87171);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">1–2%</div>
+        <div class="metric-label">margem real média atual<br><span style="color:var(--danger);font-weight:600;">potencial: 4–7%</span></div>
+      </div>
+      <div class="metric-card" style="border-color:rgba(239,68,68,.3);">
+        <div class="metric-icon">😱</div>
+        <div class="metric-val" style="background:linear-gradient(135deg,var(--danger),#f87171);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">87%</div>
+        <div class="metric-label">dos donos não conhecem<br>a margem real do posto</div>
+      </div>
+    </div>
+
+    <div style="margin-top:32px;padding:20px 36px;background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.2);border-radius:14px;text-align:center;max-width:900px;">
+      <p style="font-size:18px;color:var(--accent);font-weight:600;">
+        💡 Um setor de R$ 500 bilhões gerido como se fosse 1995. <span style="color:var(--text);font-weight:400;">Essa é a maior oportunidade de transformação por IA em décadas.</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SLIDE 3 — AS 11 DORES
+  ══════════════════════════════════ -->
+  <section class="slide" id="s3">
+    <div class="slide-header" style="margin-bottom:32px;">
+      <div class="tag tag-red" style="margin-bottom:14px;">Diagnóstico</div>
+      <h2>As 11 Dores Sistêmicas do Setor</h2>
+      <p class="sub">Problemas mapeados em centenas de postos. Você provavelmente convive com todos.</p>
+    </div>
+
+    <div class="dores-grid">
+      <div class="dor-item">
+        <div class="dor-num">01</div>
+        <div>
+          <div class="dor-text">Gestão Financeira Caótica</div>
+          <div class="dor-sub">Fluxo de caixa sem visibilidade real</div>
+        </div>
+      </div>
+      <div class="dor-item">
+        <div class="dor-num">02</div>
+        <div>
+          <div class="dor-text">Margem Real Desconhecida</div>
+          <div class="dor-sub">Lucro verdadeiro oculto por deduções invisíveis</div>
+        </div>
+      </div>
+      <div class="dor-item">
+        <div class="dor-num">03</div>
+        <div>
+          <div class="dor-text">Operação Sem Controle</div>
+          <div class="dor-sub">Estoque, variação de tanque e perdas ignorados</div>
+        </div>
+      </div>
+      <div class="dor-item">
+        <div class="dor-num">04</div>
+        <div>
+          <div class="dor-text">Gestão de Pessoas Problemática</div>
+          <div class="dor-sub">Alta rotatividade, absenteísmo e desvios</div>
+        </div>
+      </div>
+      <div class="dor-item">
+        <div class="dor-num">05</div>
+        <div>
+          <div class="dor-text">Compliance ANP em Risco</div>
+          <div class="dor-sub">Multas de até R$5M por irregularidades</div>
+        </div>
+      </div>
+      <div class="dor-item">
+        <div class="dor-num">06</div>
+        <div>
+          <div class="dor-text">Concorrência Predatória</div>
+          <div class="dor-sub">Guerra de preços sem estratégia ou dados</div>
+        </div>
+      </div>
+      <div class="dor-item">
+        <div class="dor-num">07</div>
+        <div>
+          <div class="dor-text">Inadimplência de Frota</div>
+          <div class="dor-sub">Crédito sem controle, cobrança ineficiente</div>
+        </div>
+      </div>
+      <div class="dor-item">
+        <div class="dor-num">08</div>
+        <div>
+          <div class="dor-text">Atraso Tecnológico Total</div>
+          <div class="dor-sub">Planilhas e decisões no "feeling"</div>
+        </div>
+      </div>
+      <div class="dor-item">
+        <div class="dor-num">09</div>
+        <div>
+          <div class="dor-text">Clientes sem Fidelização</div>
+          <div class="dor-sub">Zero relacionamento, zero recorrência</div>
+        </div>
+      </div>
+      <div class="dor-item">
+        <div class="dor-num">10</div>
+        <div>
+          <div class="dor-text">Energia e ESG Ignorados</div>
+          <div class="dor-sub">Contas altas, desperdícios não mapeados</div>
+        </div>
+      </div>
+      <div class="dor-item" style="grid-column:2/3;">
+        <div class="dor-num">11</div>
+        <div>
+          <div class="dor-text">Futuro Incerto — Transição Energética</div>
+          <div class="dor-sub">Elétricos chegando. Postos sem plano de adaptação.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SLIDE 4 — ANTES
+  ══════════════════════════════════ -->
+  <section class="slide" id="s4">
+    <div class="slide-header" style="margin-bottom:40px;">
+      <div class="tag tag-red" style="margin-bottom:14px;">Realidade Atual</div>
+      <h2>O Posto Sem AIOX Postos 360°</h2>
+      <p class="sub">Operação manual, decisões no escuro, dono refém do dia a dia.</p>
+    </div>
+
+    <div class="antes-grid">
+      <div class="antes-item">
+        <div class="ai-icon">📋</div>
+        <h3>Processos</h3>
+        <p>100% Manuais</p>
+        <span>Planilhas, papel, anotações. Sem automação alguma.</span>
+      </div>
+      <div class="antes-item">
+        <div class="ai-icon">🎲</div>
+        <h3>Decisões</h3>
+        <p>No "Feeling"</p>
+        <span>Intuição sem dados. Erros custosos e frequentes.</span>
+      </div>
+      <div class="antes-item">
+        <div class="ai-icon">📊</div>
+        <h3>Dados</h3>
+        <p>Sem Confiabilidade</p>
+        <span>Informações conflitantes. Relatórios sempre atrasados.</span>
+      </div>
+      <div class="antes-item">
+        <div class="ai-icon">💸</div>
+        <h3>Margem Real</h3>
+        <p style="color:var(--danger);">1 – 2%</p>
+        <span>Metade do potencial perdida por deduções invisíveis.</span>
+      </div>
+      <div class="antes-item">
+        <div class="ai-icon">⏰</div>
+        <h3>Jornada do Dono</h3>
+        <p>14h/dia no Operacional</p>
+        <span>Apagando incêndios. Sem tempo para estratégia.</span>
+      </div>
+      <div class="antes-item">
+        <div class="ai-icon">🚧</div>
+        <h3>Crescimento</h3>
+        <p>Travado e Imprevisível</p>
+        <span>Expansão impossível sem resolver o básico primeiro.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SLIDE 5 — SOLUÇÃO (22 AGENTES / 8 SQUADS)
+  ══════════════════════════════════ -->
+  <section class="slide" id="s5">
+    <div class="slide-header" style="margin-bottom:32px;">
+      <div class="tag tag-purple" style="margin-bottom:14px;">A Solução</div>
+      <h2>22 Agentes IA · 8 Squads Especializados</h2>
+      <p class="sub">Uma equipe completa de especialistas digitais — trabalhando pelo seu posto 24 horas por dia.</p>
+    </div>
+
+    <div class="squads-grid">
+      <div class="squad-card">
+        <div class="squad-icon">💼</div>
+        <div class="squad-name">Financeiro</div>
+        <div class="squad-agents">Margem · Fluxo · DRE · Break-even</div>
+      </div>
+      <div class="squad-card">
+        <div class="squad-icon">⚙️</div>
+        <div class="squad-name">Operacional</div>
+        <div class="squad-agents">Estoque · Bombas · Turno · Qualidade</div>
+      </div>
+      <div class="squad-card">
+        <div class="squad-icon">👥</div>
+        <div class="squad-name">Clientes & CRM</div>
+        <div class="squad-agents">Segmentação · Fidelidade · Frota</div>
+      </div>
+      <div class="squad-card">
+        <div class="squad-icon">🛡️</div>
+        <div class="squad-name">Compliance</div>
+        <div class="squad-agents">ANP · INMETRO · Fiscal-Tributário</div>
+      </div>
+      <div class="squad-card">
+        <div class="squad-icon">🤝</div>
+        <div class="squad-name">RH</div>
+        <div class="squad-agents">Seleção · Treinamento · NR-20</div>
+      </div>
+      <div class="squad-card">
+        <div class="squad-icon">📣</div>
+        <div class="squad-name">Marketing</div>
+        <div class="squad-agents">Google · Campanhas · Reputação</div>
+      </div>
+      <div class="squad-card">
+        <div class="squad-icon">🛒</div>
+        <div class="squad-name">Conveniência</div>
+        <div class="squad-agents">Mix · Precificação · Giro</div>
+      </div>
+      <div class="squad-card">
+        <div class="squad-icon">⚡</div>
+        <div class="squad-name">Energia & ESG</div>
+        <div class="squad-agents">Solar · Eficiência · Resíduos</div>
+      </div>
+    </div>
+
+    <div class="features-row">
+      <div class="feat-pill">⚡ Análises em tempo real</div>
+      <div class="feat-pill">🔔 Alertas automáticos</div>
+      <div class="feat-pill">🤖 Relatórios inteligentes</div>
+      <div class="feat-pill">🛡️ Prevenção de problemas</div>
+      <div class="feat-pill">📡 Dashboard 24/7</div>
+      <div class="feat-pill">📈 Diagnóstico 360° completo</div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SLIDE 6 — DEPOIS
+  ══════════════════════════════════ -->
+  <section class="slide" id="s6">
+    <div class="slide-header" style="margin-bottom:40px;">
+      <div class="tag tag-green" style="margin-bottom:14px;">Com AIOX Postos 360°</div>
+      <h2>O Posto Transformado pela IA</h2>
+      <p class="sub">Automação, inteligência e visibilidade total. Você comanda estrategicamente.</p>
+    </div>
+
+    <div class="depois-grid">
+      <div class="depois-item">
+        <div class="ai-icon">🤖</div>
+        <h3>Processos</h3>
+        <p>Automatizados pela IA</p>
+        <span>22 agentes gerenciam rotinas sem intervenção manual.</span>
+      </div>
+      <div class="depois-item">
+        <div class="ai-icon">🎯</div>
+        <h3>Decisões</h3>
+        <p>Baseadas em Dados IA</p>
+        <span>Insights precisos. Recomendações de ação em segundos.</span>
+      </div>
+      <div class="depois-item">
+        <div class="ai-icon">📊</div>
+        <h3>Visibilidade</h3>
+        <p>Dashboard Completo 24/7</p>
+        <span>Tudo em tempo real. Sem surpresas financeiras.</span>
+      </div>
+      <div class="depois-item">
+        <div class="ai-icon">💰</div>
+        <h3>Margem Real</h3>
+        <p style="color:var(--success);">4 – 7% (+200–300%)</p>
+        <span>Cada centavo de margem recuperado representa milhares.</span>
+      </div>
+      <div class="depois-item">
+        <div class="ai-icon">🏖️</div>
+        <h3>Jornada do Dono</h3>
+        <p style="color:var(--success);">Foco 100% Estratégico</p>
+        <span>IA resolve o operacional. Você decide o futuro.</span>
+      </div>
+      <div class="depois-item">
+        <div class="ai-icon">🚀</div>
+        <h3>Crescimento</h3>
+        <p style="color:var(--success);">Escalável e Previsível</p>
+        <span>Expansão para redes com ROI multiplicado por unidade.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SLIDE 7 — ROI EM NÚMEROS
+  ══════════════════════════════════ -->
+  <section class="slide" id="s7">
+    <div class="slide-header" style="margin-bottom:32px;">
+      <div class="tag tag-gold" style="margin-bottom:14px;">ROI Comprovado</div>
+      <h2>Os Números que Importam</h2>
+      <p class="sub">Posto médio · Faturamento R$ 500k/mês · Volume 300.000 L/mês</p>
+    </div>
+
+    <div class="roi-comparison">
+      <div class="roi-box antes-box">
+        <div class="rb-label">🔴 Sem AIOX</div>
+        <div class="rb-value">R$ 10k</div>
+        <div class="rb-sub">lucro líquido/mês<br><span style="font-size:12px;color:rgba(239,68,68,.6);">Margem real 2% · Situação atual</span></div>
+      </div>
+      <div class="roi-arrow">→</div>
+      <div class="roi-box depois-box">
+        <div class="rb-label">🟢 Com AIOX 360°</div>
+        <div class="rb-value">R$ 30k</div>
+        <div class="rb-sub">lucro líquido/mês<br><span style="font-size:12px;color:rgba(16,185,129,.6);">Margem real 5-6% · Após implementação</span></div>
+      </div>
+    </div>
+
+    <div class="roi-cards">
+      <div class="roi-kpi">
+        <div class="kpi-val">+R$ 20k</div>
+        <div class="kpi-label">ganho extra<br>por mês</div>
+      </div>
+      <div class="roi-kpi">
+        <div class="kpi-val">6 meses</div>
+        <div class="kpi-label">payback médio<br>do investimento</div>
+      </div>
+      <div class="roi-kpi">
+        <div class="kpi-val">150–300%</div>
+        <div class="kpi-label">ROI<br>em 12 meses</div>
+      </div>
+      <div class="roi-kpi" style="border-color:rgba(255,215,0,.3);background:rgba(255,215,0,.04);">
+        <div class="kpi-val">+R$ 200k</div>
+        <div class="kpi-label">rede de 10 postos<br>por mês extra</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;padding:14px 28px;background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.2);border-radius:10px;">
+      <p style="font-size:14px;color:var(--text-muted);">Diagnóstico gratuito calcula o ROI <span style="color:var(--accent);font-weight:700;">específico do seu posto</span> &nbsp;·&nbsp; Implementação em <span style="color:var(--success);font-weight:700;">30–60 dias</span> &nbsp;·&nbsp; Suporte contínuo incluso</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SLIDE 8 — REDES DE POSTOS
+  ══════════════════════════════════ -->
+  <section class="slide" id="s8">
+    <div class="slide-header" style="margin-bottom:36px;">
+      <div class="tag tag-purple" style="margin-bottom:14px;">Vantagem para Redes</div>
+      <h2>Quanto Maior a Rede, Maior o ROI</h2>
+      <p class="sub">Economia de escala real — o custo por posto cai e o lucro por posto sobe.</p>
+    </div>
+
+    <div class="redes-layout">
+      <div class="redes-left">
+        <div class="rede-item">
+          <div class="ri-icon">🔍</div>
+          <div class="ri-text">
+            <h4>Análise simultânea de todas as unidades</h4>
+            <p>22 agentes monitoram cada posto em paralelo, 24 horas por dia, 7 dias por semana.</p>
+          </div>
+        </div>
+        <div class="rede-item">
+          <div class="ri-icon">📊</div>
+          <div class="ri-text">
+            <h4>Benchmarking interno automático</h4>
+            <p>Identifica o posto com melhor margem e replica as práticas para toda a rede.</p>
+          </div>
+        </div>
+        <div class="rede-item">
+          <div class="ri-icon">⚡</div>
+          <div class="ri-text">
+            <h4>Melhores práticas replicadas instantaneamente</h4>
+            <p>O que funciona em uma unidade é implementado em toda a rede em horas.</p>
+          </div>
+        </div>
+        <div class="rede-item">
+          <div class="ri-icon">🎯</div>
+          <div class="ri-text">
+            <h4>Compliance centralizado para toda a rede</h4>
+            <p>ANP, INMETRO e licenças ambientais monitorados em todas as unidades ao mesmo tempo.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="redes-right">
+        <div class="scale-card">
+          <h3>⚡ Rede com 10+ Postos</h3>
+          <div class="scale-stats">
+            <div class="scale-stat">
+              <span class="ss-label">Custo por posto</span>
+              <span class="ss-val">−65%</span>
+            </div>
+            <div style="height:1px;background:var(--border);"></div>
+            <div class="scale-stat">
+              <span class="ss-label">ROI multiplicado</span>
+              <span class="ss-val">3–5×</span>
+            </div>
+            <div style="height:1px;background:var(--border);"></div>
+            <div class="scale-stat">
+              <span class="ss-label">Payback</span>
+              <span class="ss-val">2–3 meses</span>
+            </div>
+            <div style="height:1px;background:var(--border);"></div>
+            <div class="scale-stat">
+              <span class="ss-label">Ganho extra / mês</span>
+              <span class="ss-val" style="color:var(--success);">+R$ 200k</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center;margin-top:16px;">
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">Enquanto a concorrência opera com planilhas</p>
+          <p style="font-size:18px;font-weight:700;color:var(--primary-light);">Você opera com 22 especialistas IA</p>
+          <p style="font-size:13px;color:var(--text-muted);margin-top:6px;">trabalhando por cada posto simultaneamente</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SLIDE 9 — VALIDAÇÃO (JAMILLY PINK)
+  ══════════════════════════════════ -->
+  <section class="slide" id="s9">
+    <div class="slide-header" style="margin-bottom:36px;">
+      <div class="tag tag-gold" style="margin-bottom:14px;">Credibilidade & Validação</div>
+      <h2>Metodologia Validada por Quem Mais Entende do Setor</h2>
+      <p class="sub">Não é teoria. É a maior arquitetura de IA para postos de combustível já construída no Brasil.</p>
+    </div>
+
+    <div class="valid-layout">
+      <div class="validator-card gold-card">
+        <div class="val-avatar gold-avatar">⛽</div>
+        <h3>Jamilly Pink</h3>
+        <h4>Maior Autoridade em Postos de Combustível do Brasil</h4>
+        <p>Especialista nacional em gestão, lucratividade e transformação de postos de combustível. Parceira estratégica de implementação e validação do AIOX Postos 360° — quem melhor conhece as dores do setor confirma: <strong style="color:var(--text);">essa é a solução que o mercado precisava.</strong></p>
+        <div class="val-badges">
+          <span class="val-badge">🏆 Autoridade Nacional</span>
+          <span class="val-badge">⛽ Implementadora Oficial</span>
+          <span class="val-badge">✅ Validação em Campo</span>
+        </div>
+      </div>
+
+      <div class="validator-card">
+        <div class="val-avatar">🤖</div>
+        <h3>AIOX Postos 360°</h3>
+        <h4>Tecnologia · Rainha da Mídia IA</h4>
+        <p>A maior arquitetura de agentes de IA para o setor de postos de combustível já desenvolvida no Brasil. 22 agentes especializados, 8 squads, 93 assets criados — cada detalhe pensado para a realidade operacional, regulatória e financeira do setor.</p>
+        <div class="val-badges" style="margin-top:18px;">
+          <span class="val-badge">🤖 22 Agentes IA</span>
+          <span class="val-badge">📋 93 Assets</span>
+          <span class="val-badge">🔒 INPI Registrado</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="badges-row">
+      <div class="badge-pill">🏆 Registro de Direitos Autorais INPI</div>
+      <div class="badge-pill">🤖 22 Agentes em Produção</div>
+      <div class="badge-pill">⛽ Validado por Especialista do Setor</div>
+      <div class="badge-pill">📈 ROI Calculado por Posto</div>
+      <div class="badge-pill">🛡️ Compliance ANP + INMETRO + Ambiental</div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SLIDE 10 — CTA
+  ══════════════════════════════════ -->
+  <section class="slide" id="s10">
+    <div class="slide-header" style="margin-bottom:20px;">
+      <div class="tag tag-purple" style="margin-bottom:14px;">Próximo Passo</div>
+      <h2>Comece com um Diagnóstico 360° Gratuito</h2>
+      <p class="sub">22 agentes analisam seu posto e calculam o ROI personalizado em 48 horas.</p>
+    </div>
+
+    <div class="cta-steps">
+      <div class="cta-step">
+        <div class="step-num">1</div>
+        <h4>Entre em Contato</h4>
+        <p>WhatsApp ou e-mail. Retorno em menos de 2 horas.</p>
+      </div>
+      <div class="cta-step">
+        <div class="step-num">2</div>
+        <h4>Diagnóstico Gratuito</h4>
+        <p>22 agentes analisam seu posto ou rede. Sem compromisso.</p>
+      </div>
+      <div class="cta-step">
+        <div class="step-num">3</div>
+        <h4>ROI Personalizado</h4>
+        <p>Relatório com ganho projetado para o seu negócio específico.</p>
+      </div>
+    </div>
+
+    <div class="contacts-grid">
+      <div class="contact-card">
+        <div class="cc-icon">👤</div>
+        <div class="cc-info">
+          <h4>Responsável</h4>
+          <p>Emily Susan - Rainha da Mídia IA</p>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="cc-icon">📱</div>
+        <div class="cc-info">
+          <h4>WhatsApp</h4>
+          <p>51 98133-7913</p>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="cc-icon">📧</div>
+        <div class="cc-info">
+          <h4>E-mail</h4>
+          <p>rainhadamidia@gmail.com</p>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="cc-icon">🏢</div>
+        <div class="cc-info">
+          <h4>Rainha da Mídia IA Ltda</h4>
+          <p>CNPJ 62.023.834/0001-70</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;padding:14px 32px;background:linear-gradient(135deg,rgba(139,92,246,.2),rgba(255,215,0,.1));border:1px solid rgba(255,215,0,.3);border-radius:12px;">
+      <p style="font-size:16px;font-weight:600;color:var(--accent);">🎁 Diagnóstico 100% gratuito · Sem compromisso · Resultado personalizado em 48 horas</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SLIDE 11 — PLANOS
+  ══════════════════════════════════ -->
+  <section class="slide" id="s11">
+    <div class="slide-header" style="margin-bottom:32px;">
+      <div class="tag tag-gold" style="margin-bottom:14px;">Planos e Investimento</div>
+      <h2>Escolha o Plano Ideal para seu Negócio</h2>
+      <p class="sub">Quanto mais postos, menor o custo por unidade — e maior o impacto no resultado.</p>
+    </div>
+
+    <div class="plans-grid">
+
+      <!-- PLANO 1 — IMPULSO -->
+      <div class="plan-card">
+        <div class="plan-name">Plano Impulso</div>
+        <div class="plan-title">Posto Solo</div>
+        <div class="plan-subtitle">1 unidade · Ideal para começar</div>
+        <div class="plan-price-row">
+          <span class="plan-price-prefix">R$</span>
+          <span class="plan-price" style="color:var(--primary-light);">4.997</span>
+          <span class="plan-price-suffix">/mês</span>
+        </div>
+        <div class="plan-price-note">por posto · contrato mensal</div>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="pf-item"><span class="pf-icon">🤖</span> 22 agentes IA especializados</div>
+          <div class="pf-item"><span class="pf-icon">📊</span> Dashboard financeiro e operacional 24/7</div>
+          <div class="pf-item"><span class="pf-icon">⛽</span> Controle de margem real e estoque</div>
+          <div class="pf-item"><span class="pf-icon">🛡️</span> Compliance ANP + INMETRO automatizado</div>
+          <div class="pf-item"><span class="pf-icon">👥</span> Gestão de equipe e escalas</div>
+          <div class="pf-item"><span class="pf-icon">📈</span> Diagnóstico 360° e plano de ação</div>
+          <div class="pf-item"><span class="pf-icon">✉️</span> Suporte via WhatsApp e e-mail</div>
+        </div>
+        <div class="plan-setup">Implantação: <strong>R$ 12.000</strong> (única vez)</div>
+        <button class="plan-cta cta-outline">Quero Começar</button>
+      </div>
+
+      <!-- PLANO 2 — REDE (DESTAQUE) -->
+      <div class="plan-card featured">
+        <div class="plan-badge pb-purple">⚡ Mais Escolhido</div>
+        <div class="plan-name">Plano Rede</div>
+        <div class="plan-title">Rede Crescente</div>
+        <div class="plan-subtitle">2 – 9 postos · Escala regional</div>
+        <div class="plan-price-row">
+          <span class="plan-price-prefix">R$</span>
+          <span class="plan-price" style="background:linear-gradient(135deg,var(--primary-light),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">2.997</span>
+          <span class="plan-price-suffix">/mês</span>
+        </div>
+        <div class="plan-price-note">por posto · economia de até <b style="color:var(--primary-light);">40%</b></div>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="pf-item"><span class="pf-icon">🤖</span> <b>22 agentes IA</b> por unidade</div>
+          <div class="pf-item"><span class="pf-icon">🔍</span> Benchmarking automático entre postos</div>
+          <div class="pf-item"><span class="pf-icon">📊</span> Painel consolidado multi-unidade</div>
+          <div class="pf-item"><span class="pf-icon">⚡</span> Melhores práticas replicadas na rede</div>
+          <div class="pf-item"><span class="pf-icon">🛡️</span> Compliance + Fiscal-Tributário IA</div>
+          <div class="pf-item"><span class="pf-icon">📣</span> Campanhas de fidelidade por posto</div>
+          <div class="pf-item"><span class="pf-icon">🎯</span> Gerente de conta dedicado</div>
+        </div>
+        <div class="plan-setup">Implantação: <strong>R$ 8.000/unidade</strong> (única vez)</div>
+        <button class="plan-cta cta-primary">Escalar Minha Rede</button>
+      </div>
+
+      <!-- PLANO 3 — BRASIL -->
+      <div class="plan-card featured-gold">
+        <div class="plan-badge pb-gold">🏆 Dominância</div>
+        <div class="plan-name">Plano Brasil</div>
+        <div class="plan-title">Expansão Nacional</div>
+        <div class="plan-subtitle">10+ postos · Liderança de mercado</div>
+        <div class="plan-price-row">
+          <span class="plan-price-prefix">R$</span>
+          <span class="plan-price" style="color:var(--accent);">1.497</span>
+          <span class="plan-price-suffix">/mês</span>
+        </div>
+        <div class="plan-price-note">por posto · economia de até <b style="color:var(--accent);">70%</b></div>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="pf-item"><span class="pf-icon">🤖</span> <b>22 agentes IA</b> + Orquestrador Master</div>
+          <div class="pf-item"><span class="pf-icon">🌎</span> Gestão centralizada em nível nacional</div>
+          <div class="pf-item"><span class="pf-icon">🚀</span> Onboarding de novas unidades em 7 dias</div>
+          <div class="pf-item"><span class="pf-icon">📈</span> Relatório executivo mensal por rede</div>
+          <div class="pf-item"><span class="pf-icon">⚡</span> Integração com sistemas e bandeiras</div>
+          <div class="pf-item"><span class="pf-icon">🔒</span> SLA 99,9% + segurança enterprise</div>
+          <div class="pf-item"><span class="pf-icon">🤝</span> Parceria estratégica exclusiva</div>
+        </div>
+        <div class="plan-setup">Implantação: <strong>R$ 5.000/unidade</strong> · Condições especiais</div>
+        <button class="plan-cta cta-gold">Falar com Especialista</button>
+      </div>
+
+    </div>
+
+    <div class="plans-note" style="margin-top:24px;">
+      <span>🎁 <b>Diagnóstico gratuito</b> incluso em todos os planos</span>
+      <div class="sep"></div>
+      <span>📅 <b>Implementação</b> em 30–60 dias</span>
+      <div class="sep"></div>
+      <span>🔄 <b>Contrato mensal</b> sem fidelidade</span>
+      <div class="sep"></div>
+      <span>📱 <b>WhatsApp:</b> 51 98133-7913</span>
+    </div>
+  </section>
+
+</div><!-- /deck -->
+
+<!-- ── NAVEGAÇÃO ── -->
+<button class="nav-arrow nav-prev" id="btnPrev" aria-label="Slide anterior">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="15 18 9 12 15 6"/>
+  </svg>
+</button>
+<button class="nav-arrow nav-next" id="btnNext" aria-label="Próximo slide">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="9 6 15 12 9 18"/>
+  </svg>
+</button>
+
+<div class="dots" id="dots"></div>
+<div class="slide-counter" id="counter"></div>
+
+<script>
+(function(){
+  const slides = document.querySelectorAll('.slide');
+  const dotsEl = document.getElementById('dots');
+  const counter = document.getElementById('counter');
+  let current = 0;
+  let animating = false;
+
+  slides.forEach((_,i)=>{
+    const d = document.createElement('div');
+    d.className = 'dot' + (i===0?' active':'');
+    d.addEventListener('click', ()=> goTo(i));
+    dotsEl.appendChild(d);
+  });
+
+  function updateUI(){
+    document.querySelectorAll('.dot').forEach((d,i)=> d.classList.toggle('active', i===current));
+    counter.textContent = (current+1) + ' / ' + slides.length;
+  }
+
+  function goTo(n){
+    if(animating || n === current) return;
+    animating = true;
+    const prev = current;
+    current = Math.max(0, Math.min(slides.length-1, n));
+    slides[prev].classList.add('exit');
+    slides[prev].classList.remove('active');
+    slides[current].classList.remove('exit');
+    slides[current].classList.add('active');
+    setTimeout(()=>{
+      slides[prev].classList.remove('exit');
+      animating = false;
+    }, 420);
+    updateUI();
+  }
+
+  document.getElementById('btnPrev').addEventListener('click', ()=> goTo(current-1));
+  document.getElementById('btnNext').addEventListener('click', ()=> goTo(current+1));
+
+  document.addEventListener('keydown', e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' ') { e.preventDefault(); goTo(current+1); }
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')                 { e.preventDefault(); goTo(current-1); }
+    if(e.key==='Home') goTo(0);
+    if(e.key==='End')  goTo(slides.length-1);
+  });
+
+  let tx = 0;
+  document.addEventListener('touchstart', e=>{ tx = e.touches[0].clientX; }, {passive:true});
+  document.addEventListener('touchend',   e=>{
+    const dx = e.changedTouches[0].clientX - tx;
+    if(Math.abs(dx) > 50) dx < 0 ? goTo(current+1) : goTo(current-1);
+  }, {passive:true});
+
+  updateUI();
+})();
+</script>
+</body>
+</html>
