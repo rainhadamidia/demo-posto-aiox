@@ -379,35 +379,107 @@
   .fund-item h4 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
   .fund-item p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
 
-  /* ── S11 PRÓXIMOS PASSOS ── */
+  /* ── S11 DEAL TERMS / PROPOSTA DE INVESTIMENTO ── */
   #s11 {
-    background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(109,40,217,.28) 0%, var(--dark) 70%);
-    text-align: center;
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(255,215,0,.07) 0%, var(--dark) 70%);
+    justify-content: flex-start;
+    padding-top: 52px;
+    padding-bottom: 52px;
   }
-  #s11 .ask-final {
-    background: linear-gradient(135deg, rgba(255,215,0,.14), rgba(139,92,246,.14));
-    border: 2px solid var(--gold-border); border-radius: 24px;
-    padding: 36px 60px; margin: 28px auto;
-    display: inline-flex; flex-direction: column; align-items: center; gap: 8px;
+
+  /* Métricas hero */
+  #s11 .deal-hero {
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 14px;
+    width: 100%; max-width: 1100px; margin-top: 20px;
   }
-  #s11 .af-label { font-size: 14px; font-weight: 700; color: var(--text-muted); letter-spacing: .1em; text-transform: uppercase; }
-  #s11 .af-range { font-size: clamp(42px,5vw,64px); font-weight: 900; color: var(--accent); line-height: 1; }
-  #s11 .af-sub { font-size: 16px; color: var(--text-muted); }
-  #s11 .steps-row { display: flex; gap: 16px; max-width: 900px; width: 100%; margin: 0 auto 28px; }
-  .step-box {
-    flex: 1; background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 24px 18px;
-    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  .dh-card {
+    background: var(--surface); border-radius: 18px; padding: 22px 18px; text-align: center;
+    border: 1px solid var(--gold-border);
+    background: linear-gradient(160deg, rgba(255,215,0,.07) 0%, var(--surface) 60%);
   }
-  .step-box .sn {
-    width: 38px; height: 38px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 15px; font-weight: 800;
+  .dh-card .dh-label { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+  .dh-card .dh-val { font-size: clamp(20px,2.2vw,28px); font-weight: 900; color: var(--accent); line-height: 1.1; }
+  .dh-card .dh-sub { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+
+  /* Alocação de capital */
+  #s11 .aloc-grid {
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 12px;
+    width: 100%; max-width: 1100px; margin-top: 14px;
   }
-  .step-box h4 { font-size: 15px; font-weight: 700; }
-  .step-box p { font-size: 13px; color: var(--text-muted); text-align: center; line-height: 1.5; }
-  #s11 .contacts-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; max-width: 900px; }
+  .aloc-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px 14px; text-align: center;
+  }
+  .aloc-card .ac-pct { font-size: 28px; font-weight: 900; line-height: 1; margin-bottom: 4px; }
+  .aloc-card .ac-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .aloc-card .ac-val { font-size: 12px; color: var(--text-muted); }
+  .aloc-card .ac-note { font-size: 10px; color: var(--text-muted); margin-top: 3px; font-style: italic; }
+  .aloc-card.purple { border-color: rgba(139,92,246,.35); }
+  .aloc-card.purple .ac-pct { color: var(--primary-light); }
+  .aloc-card.gold { border-color: var(--gold-border); }
+  .aloc-card.gold .ac-pct { color: var(--accent); }
+  .aloc-card.green { border-color: rgba(16,185,129,.3); }
+  .aloc-card.green .ac-pct { color: var(--success); }
+  .aloc-card.blue { border-color: rgba(59,130,246,.3); }
+  .aloc-card.blue .ac-pct { color: #60A5FA; }
+
+  /* Projeção 12 meses */
+  #s11 .proj-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    width: 100%; max-width: 1100px; margin-top: 14px;
+  }
+  .proj-qtrs {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 20px;
+  }
+  .proj-qtrs h4 { font-size: 12px; font-weight: 700; color: var(--primary-light); letter-spacing: .07em; text-transform: uppercase; margin-bottom: 12px; }
+  .qtr-line { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+  .qtr-line:last-child { border-bottom: none; }
+  .qtr-line .ql-period { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+  .qtr-line .ql-val { font-size: 15px; font-weight: 800; color: var(--text); }
+  .qtr-line .ql-note { font-size: 11px; color: var(--text-muted); }
+  .qtr-line.highlight .ql-val { color: var(--accent); }
+
+  .proj-anual {
+    background: var(--surface); border: 1px solid var(--gold-border);
+    border-radius: 14px; padding: 18px 20px;
+    background: linear-gradient(160deg, rgba(255,215,0,.06) 0%, var(--surface) 60%);
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .proj-anual h4 { font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: .07em; text-transform: uppercase; margin-bottom: 12px; }
+  .pa-stat { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+  .pa-stat:last-child { border-bottom: none; }
+  .pa-stat .ps-label { font-size: 13px; color: var(--text-muted); }
+  .pa-stat .ps-val { font-size: 18px; font-weight: 900; color: var(--accent); }
+  .pa-stat.ps-profit .ps-val { color: var(--success); }
+
+  /* ROI + Justificativa */
+  #s11 .bottom-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    width: 100%; max-width: 1100px; margin-top: 14px;
+  }
+  .roi-card {
+    background: linear-gradient(160deg, rgba(139,92,246,.12) 0%, var(--surface) 60%);
+    border: 1px solid rgba(139,92,246,.35);
+    border-radius: 14px; padding: 18px 20px;
+  }
+  .roi-card h4 { font-size: 12px; font-weight: 700; color: var(--primary-light); letter-spacing: .07em; text-transform: uppercase; margin-bottom: 12px; }
+  .roi-stat { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+  .roi-stat:last-child { border-bottom: none; }
+  .roi-stat .rst-label { font-size: 13px; color: var(--text-muted); }
+  .roi-stat .rst-val { font-size: 16px; font-weight: 800; color: var(--primary-light); }
+  .roi-stat.rst-destaque .rst-val { font-size: 20px; color: var(--accent); }
+
+  .ops-box {
+    background: rgba(255,215,0,.05); border: 1px solid var(--gold-border);
+    border-radius: 14px; padding: 18px 20px;
+    display: flex; flex-direction: column; justify-content: center; gap: 10px;
+  }
+  .ops-box .ob-title { font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: .08em; text-transform: uppercase; }
+  .ops-box .ob-line { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  .ops-box .ob-line::before { content: '⚡'; flex-shrink: 0; margin-top: 1px; }
+  .ops-box .ob-highlight { font-size: 13px; font-weight: 700; color: var(--text); }
+
   .c-card {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 14px; padding: 16px 24px;
@@ -418,6 +490,7 @@
   .c-card .ci { font-size: 22px; }
   .c-card h4 { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 2px; }
   .c-card p { font-size: 14px; font-weight: 500; color: var(--text); }
+  #s11 .contacts-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; max-width: 1100px; margin-top: 14px; }
 
   @media print {
     .nav-arrow, .dots, .slide-counter, .slide-label { display: none !important; }
@@ -1108,41 +1181,133 @@
        S11 — PRÓXIMOS PASSOS / CTA
   ══════════════════════════════ -->
   <section class="slide" id="s11">
-    <div class="slide-header" style="margin-bottom:4px;">
-      <div class="tag tag-gold" style="margin-bottom:12px;">Próximos Passos</div>
-      <h2>Vamos Construir Isso Juntos</h2>
-      <p class="sub">Produto pronto. Validadora confirmada. Mercado enorme. Falta o capital para escalar.</p>
+    <div class="slide-header" style="margin-bottom:16px; text-align:center;">
+      <div class="tag tag-gold" style="margin-bottom:10px;">Proposta de Investimento</div>
+      <h2>Deal Terms — AIOX Postos 360°</h2>
+      <p class="sub">Valuation baseado em produto pronto, IP registrado e validadora confirmada.</p>
     </div>
 
-    <div class="ask-final">
-      <div class="af-label">Investimento Solicitado</div>
-      <div class="af-range">R$ 150.000 – R$ 210.000</div>
-      <div class="af-sub">Para desenvolver a plataforma SaaS e escalar os primeiros 60 postos em 12 meses</div>
-    </div>
-
-    <div class="steps-row">
-      <div class="step-box">
-        <div class="sn">1</div>
-        <h4>Due Diligence</h4>
-        <p>Acesso a produto, documentação técnica, registro INPI e proposta de parceria com Jamilly Pink.</p>
+    <!-- Métricas hero -->
+    <div class="deal-hero">
+      <div class="dh-card">
+        <div class="dh-label">Investimento</div>
+        <div class="dh-val">R$ 150.000</div>
+        <div class="dh-sub">Aporte único · seed</div>
       </div>
-      <div class="step-box">
-        <div class="sn">2</div>
-        <h4>Negociação</h4>
-        <p>Definir estrutura do investimento: equity, mútuo conversível ou modelo híbrido.</p>
+      <div class="dh-card">
+        <div class="dh-label">Equity Ofertado</div>
+        <div class="dh-val">10–15%</div>
+        <div class="dh-sub">Negociável</div>
       </div>
-      <div class="step-box">
-        <div class="sn">3</div>
-        <h4>Contrato e Aporte</h4>
-        <p>Formalização com suporte jurídico. Cronograma de liberação conforme marcos acordados.</p>
+      <div class="dh-card">
+        <div class="dh-label">Valuation Pré-Money</div>
+        <div class="dh-val">R$ 1.000.000</div>
+        <div class="dh-sub">Baseado em IP + produto + parceria</div>
       </div>
-      <div class="step-box">
-        <div class="sn">4</div>
-        <h4>Execução</h4>
-        <p>Desenvolvimento do SaaS, onboarding dos primeiros postos e geração dos cases iniciais.</p>
+      <div class="dh-card">
+        <div class="dh-label">Valuation Pós-Money</div>
+        <div class="dh-val">R$ 1,15M – 1,21M</div>
+        <div class="dh-sub">Conforme equity acordado</div>
       </div>
     </div>
 
+    <!-- Alocação de capital -->
+    <div style="width:100%;max-width:1100px;margin-top:14px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Alocação do Capital — R$ 150.000</div>
+      <div class="aloc-grid">
+        <div class="aloc-card purple">
+          <div class="ac-pct">27%</div>
+          <div class="ac-name">Desenvolvimento</div>
+          <div class="ac-val">R$ 40.000</div>
+        </div>
+        <div class="aloc-card gold">
+          <div class="ac-pct">33%</div>
+          <div class="ac-name">Marketing</div>
+          <div class="ac-val">R$ 50.000</div>
+          <div class="ac-note">Após validação Jamilly</div>
+        </div>
+        <div class="aloc-card green">
+          <div class="ac-pct">27%</div>
+          <div class="ac-name">Operacional</div>
+          <div class="ac-val">R$ 40.000</div>
+          <div class="ac-note">Capital giro 6 meses</div>
+        </div>
+        <div class="aloc-card blue">
+          <div class="ac-pct">13%</div>
+          <div class="ac-name">Infraestrutura</div>
+          <div class="ac-val">R$ 20.000</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Projeção 12 meses + ROI -->
+    <div class="proj-row">
+      <div class="proj-qtrs">
+        <h4>📈 Projeção MRR — 12 Meses</h4>
+        <div class="qtr-line">
+          <span class="ql-period">Q1</span>
+          <span class="ql-val">R$ 5k – 10k MRR</span>
+        </div>
+        <div class="qtr-line">
+          <span class="ql-period">Q2</span>
+          <span class="ql-val">R$ 15k – 30k MRR</span>
+        </div>
+        <div class="qtr-line highlight">
+          <span class="ql-period">Q3</span>
+          <span class="ql-val">R$ 40k – 60k MRR</span>
+          <span class="ql-note">Feira Setembro</span>
+        </div>
+        <div class="qtr-line highlight">
+          <span class="ql-period">Q4</span>
+          <span class="ql-val">R$ 60k – 100k MRR</span>
+        </div>
+      </div>
+
+      <div class="proj-anual">
+        <h4>💰 Resultado Ano 1</h4>
+        <div class="pa-stat">
+          <span class="ps-label">Faturamento bruto</span>
+          <span class="ps-val">R$ 500k – 800k</span>
+        </div>
+        <div class="pa-stat ps-profit">
+          <span class="ps-label">Lucro estimado</span>
+          <span class="ps-val" style="color:var(--success);">R$ 350k – 640k</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROI Investidor + Justificativa Operacional -->
+    <div class="bottom-row">
+      <div class="roi-card">
+        <h4>🏆 ROI do Investidor</h4>
+        <div class="roi-stat">
+          <span class="rst-label">Investimento</span>
+          <span class="rst-val">R$ 150k · 10–15%</span>
+        </div>
+        <div class="roi-stat">
+          <span class="rst-label">Valuation Ano 1</span>
+          <span class="rst-val">R$ 3M – 5M</span>
+        </div>
+        <div class="roi-stat">
+          <span class="rst-label">Stake projetada</span>
+          <span class="rst-val">R$ 300k – 750k</span>
+        </div>
+        <div class="roi-stat rst-destaque">
+          <span class="rst-label">Retorno</span>
+          <span class="rst-val">2–5× em 12 meses</span>
+        </div>
+      </div>
+
+      <div class="ops-box">
+        <div class="ob-title">⚡ Eficiência Operacional</div>
+        <div class="ob-line"><span>Emily atua como <span class="ob-highlight">EUGÊNCIA</span> — &lt;1% do Brasil domina AIOX.</span></div>
+        <div class="ob-line"><span>Trabalho solo equivale a time de <span class="ob-highlight">5 pessoas (R$ 52k/mês)</span>.</span></div>
+        <div class="ob-line"><span>Pedindo <span class="ob-highlight">R$ 6.600/mês = 87% abaixo do mercado</span>.</span></div>
+        <div class="ob-line"><span>Assume <span class="ob-highlight">100% da responsabilidade técnica e operacional</span>.</span></div>
+      </div>
+    </div>
+
+    <!-- Contatos -->
     <div class="contacts-row">
       <div class="c-card">
         <div class="ci">👩‍💼</div>
