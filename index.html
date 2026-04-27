@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIOX Postos 360° — Materiais</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0A0A0A;
+    color: #F5F5F9;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+  }
+  .logo-ring {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(135deg, #6D28D9, #8B5CF6);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+    box-shadow: 0 0 50px rgba(139,92,246,.5);
+  }
+  .logo-ring svg { width: 40px; height: 40px; }
+  h1 {
+    font-size: clamp(22px, 5vw, 32px);
+    font-weight: 900;
+    text-align: center;
+    background: linear-gradient(135deg, #fff 0%, #A78BFA 60%, #FFD700 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 8px;
+  }
+  .sub {
+    font-size: 14px; color: #9CA3AF; text-align: center;
+    margin-bottom: 40px;
+  }
+  .cards {
+    display: flex; flex-direction: column; gap: 16px;
+    width: 100%; max-width: 420px;
+  }
+  .card {
+    display: flex; align-items: center; gap: 18px;
+    background: #1A1A1A;
+    border: 1px solid rgba(139,92,246,.25);
+    border-radius: 18px;
+    padding: 22px 24px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color .2s, transform .2s, box-shadow .2s;
+  }
+  .card:hover { border-color: #8B5CF6; transform: translateY(-3px); box-shadow: 0 8px 30px rgba(139,92,246,.2); }
+  .card.gold { border-color: rgba(255,215,0,.25); }
+  .card.gold:hover { border-color: #FFD700; box-shadow: 0 8px 30px rgba(255,215,0,.18); }
+  .card-icon { font-size: 32px; flex-shrink: 0; }
+  .card-body h2 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .card-body p  { font-size: 13px; color: #9CA3AF; line-height: 1.4; }
+  .arrow { margin-left: auto; font-size: 20px; color: #8B5CF6; flex-shrink: 0; }
+  .card.gold .arrow { color: #FFD700; }
+  .footer {
+    margin-top: 48px; text-align: center;
+    font-size: 12px; color: rgba(245,245,249,.25); letter-spacing: .06em;
+  }
+</style>
+</head>
+<body>
+
+<div class="logo-ring">
+  <svg viewBox="0 0 52 52" fill="none">
+    <circle cx="26" cy="26" r="10" fill="rgba(255,215,0,.9)"/>
+    <circle cx="26" cy="10" r="4" fill="rgba(255,255,255,.7)"/>
+    <circle cx="26" cy="42" r="4" fill="rgba(255,255,255,.7)"/>
+    <circle cx="10" cy="26" r="4" fill="rgba(255,255,255,.7)"/>
+    <circle cx="42" cy="26" r="4" fill="rgba(255,255,255,.7)"/>
+  </svg>
+</div>
+
+<h1>AIOX Postos 360°</h1>
+<p class="sub">Selecione o material que deseja visualizar</p>
+
+<div class="cards">
+  <a class="card" href="demo-postos-combustivel.html">
+    <div class="card-icon">⛽</div>
+    <div class="card-body">
+      <h2>Apresentação Comercial</h2>
+      <p>Demo completa para donos de postos — 11 slides</p>
+    </div>
+    <div class="arrow">›</div>
+  </a>
+
+  <a class="card gold" href="pitch-banco-investidor.html">
+    <div class="card-icon">💼</div>
+    <div class="card-body">
+      <h2>Pitch para Investidor</h2>
+      <p>Deck de captação de R$ 150k–210k — 11 slides</p>
+    </div>
+    <div class="arrow">›</div>
+  </a>
+</div>
+
+<div class="footer">
+  Rainha da Mídia IA Ltda &nbsp;·&nbsp; rainhadamidia@gmail.com &nbsp;·&nbsp; 51 98133-7913
+</div>
+
+</body>
+</html>
