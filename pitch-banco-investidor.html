@@ -492,6 +492,118 @@
   .c-card p { font-size: 14px; font-weight: 500; color: var(--text); }
   #s11 .contacts-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; max-width: 1100px; margin-top: 14px; }
 
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    .slide {
+      padding: 52px 14px 74px;
+      justify-content: flex-start;
+    }
+    /* Navegação */
+    .nav-arrow { width: 38px; height: 38px; }
+    .nav-prev  { left: 6px; }
+    .nav-next  { right: 6px; }
+    .nav-arrow svg { width: 16px; height: 16px; }
+    .slide-counter { right: 52px; top: 18px; font-size: 11px; }
+    .slide-label   { left: 14px; top: 18px; font-size: 10px; }
+    .dots { bottom: 16px; gap: 7px; }
+
+    /* Geral */
+    .tag { font-size: 10px; padding: 4px 10px; }
+    .slide-header h2 { font-size: clamp(20px, 5vw, 30px); }
+    .slide-header .sub { font-size: 13px; }
+
+    /* S1 — Capa Investidor */
+    #s1 .logo-ring { width: 72px; height: 72px; margin-bottom: 16px; }
+    #s1 h1 { font-size: clamp(26px, 7vw, 40px); }
+    #s1 .sub-title { font-size: 13px; }
+    #s1 .ask-box { padding: 20px 24px; margin-bottom: 24px; }
+    #s1 .ask-value { font-size: clamp(26px, 6vw, 38px); }
+    #s1 .meta-row { gap: 14px; }
+    #s1 .meta-item .mv { font-size: 16px; }
+    #s1 .meta-item .ml { font-size: 11px; }
+    #s1 .meta-item[style*="width:1px"] { display: none; }
+
+    /* S2 — Problema / Oportunidade */
+    #s2 .opp-grid { grid-template-columns: 1fr; gap: 14px; }
+    .opp-card { padding: 20px 18px; }
+    .opp-stat .os-val { font-size: 16px; }
+
+    /* S3 — Produto */
+    #s3 .produto-layout { grid-template-columns: 1fr; gap: 14px; }
+    .prod-item { padding: 14px 16px; }
+    .prod-item h4 { font-size: 14px; }
+    .squads-mini { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .sq-mini { padding: 10px 12px; }
+    .sq-mini .sqm-icon { font-size: 16px; }
+    .sq-mini .sqm-name { font-size: 11px; }
+    .sq-mini .sqm-sub  { font-size: 9px; }
+
+    /* S4 — Validação e Tração */
+    #s4 .traction-grid { grid-template-columns: 1fr; gap: 12px; }
+    .traction-card { padding: 20px 16px; }
+    .traction-card .tc-val { font-size: clamp(20px, 4vw, 28px); }
+    .jamilly-box { flex-direction: column; padding: 18px 16px; gap: 14px; }
+    .jamilly-box .jb-text h4 { font-size: 14px; }
+    .jamilly-box .jb-text p  { font-size: 12px; }
+
+    /* S5 — Modelo de Negócio */
+    #s5 .modelo-grid { grid-template-columns: 1fr; gap: 14px; }
+    .modelo-card { padding: 20px 18px; }
+    .receita-box { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .receita-item { padding: 14px; }
+    .receita-item .ri-val { font-size: 17px; }
+
+    /* S6 — Projeção Financeira */
+    #s6 .proj-table { font-size: 11px; }
+    #s6 .proj-table th,
+    #s6 .proj-table td { padding: 9px 8px; font-size: 11px; }
+    .cenario-pills { gap: 10px; }
+    .cenario-pill { padding: 10px 18px; }
+    .cenario-card { padding: 16px 14px; }
+    .cenario-card .cc-val { font-size: 22px; }
+    .cenarios-row { grid-template-columns: 1fr; gap: 10px; }
+
+    /* S7 — Uso dos Recursos */
+    #s7 .uso-layout { grid-template-columns: 1fr; gap: 14px; }
+    .uso-bar-item .ubi-label { font-size: 12px; }
+    .uso-bar-item .ubi-val { font-size: 11px; }
+    .uso-kpi { padding: 16px; }
+    .cronograma { padding: 16px; }
+
+    /* S8 — Vantagens Competitivas */
+    #s8 .vant-grid { grid-template-columns: 1fr; gap: 12px; }
+    .vant-card { padding: 18px 16px; }
+    .vant-card h4 { font-size: 14px; }
+    .moat-box { gap: 16px; padding: 14px 18px; flex-direction: column; align-items: flex-start; }
+
+    /* S9 — Retorno do Investidor */
+    #s9 .retorno-grid { grid-template-columns: 1fr; gap: 14px; }
+    .retorno-card { padding: 22px 18px; }
+    .cenarios-row { grid-template-columns: 1fr; gap: 10px; }
+    .ret-stat .rs-val { font-size: 16px; }
+
+    /* S10 — Fundadora */
+    #s10 .fund-layout { grid-template-columns: 1fr; gap: 14px; }
+    .fund-card { padding: 24px 18px; }
+    .fund-avatar { width: 68px; height: 68px; font-size: 28px; }
+    .fund-card h3 { font-size: 18px; }
+    .fund-item { padding: 14px 16px; }
+    .fund-item h4 { font-size: 13px; }
+
+    /* S11 — Deal Terms */
+    #s11 { padding-top: 52px; padding-bottom: 52px; }
+    #s11 .deal-hero { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .dh-card { padding: 14px 10px; }
+    .dh-card .dh-val { font-size: clamp(14px, 3.5vw, 20px); }
+    #s11 .aloc-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .aloc-card { padding: 12px 10px; }
+    .aloc-card .ac-pct { font-size: 22px; }
+    #s11 .proj-row { grid-template-columns: 1fr; gap: 10px; }
+    #s11 .bottom-row { grid-template-columns: 1fr; gap: 10px; }
+    #s11 .contacts-row { flex-direction: column; gap: 8px; }
+    .c-card { padding: 12px 16px; width: 100%; }
+  }
+
   @media print {
     .nav-arrow, .dots, .slide-counter, .slide-label { display: none !important; }
     .slide { position: relative !important; opacity: 1 !important; transform: none !important; page-break-after: always; height: 100vh; }
